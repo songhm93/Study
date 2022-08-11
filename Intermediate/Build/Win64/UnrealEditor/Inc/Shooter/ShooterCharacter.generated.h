@@ -14,8 +14,20 @@ PRAGMA_DISABLE_DEPRECATION_WARNINGS
 #define SHOOTER_ShooterCharacter_generated_h
 
 #define FID_Shooter_Source_Shooter_ShooterCharacter_h_16_SPARSE_DATA
-#define FID_Shooter_Source_Shooter_ShooterCharacter_h_16_RPC_WRAPPERS
-#define FID_Shooter_Source_Shooter_ShooterCharacter_h_16_RPC_WRAPPERS_NO_PURE_DECLS
+#define FID_Shooter_Source_Shooter_ShooterCharacter_h_16_RPC_WRAPPERS \
+ \
+	DECLARE_FUNCTION(execGetCrosshairSpreadMultiplier); \
+	DECLARE_FUNCTION(execAutoFireReset); \
+	DECLARE_FUNCTION(execCrosshairFireTimerFinished);
+
+
+#define FID_Shooter_Source_Shooter_ShooterCharacter_h_16_RPC_WRAPPERS_NO_PURE_DECLS \
+ \
+	DECLARE_FUNCTION(execGetCrosshairSpreadMultiplier); \
+	DECLARE_FUNCTION(execAutoFireReset); \
+	DECLARE_FUNCTION(execCrosshairFireTimerFinished);
+
+
 #define FID_Shooter_Source_Shooter_ShooterCharacter_h_16_INCLASS_NO_PURE_DECLS \
 private: \
 	static void StaticRegisterNativesAShooterCharacter(); \

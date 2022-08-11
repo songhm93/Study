@@ -94,6 +94,19 @@ void EmptyLinkFunctionForGeneratedCodeShooterAnimInstance() {}
 #endif
 		static void NewProp_bIsAccelerating_SetBit(void* Obj);
 		static const UECodeGen_Private::FBoolPropertyParams NewProp_bIsAccelerating;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_MovementYawOffset_MetaData[];
+#endif
+		static const UECodeGen_Private::FFloatPropertyParams NewProp_MovementYawOffset;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_LastMovementYawOffset_MetaData[];
+#endif
+		static const UECodeGen_Private::FFloatPropertyParams NewProp_LastMovementYawOffset;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_bAiming_MetaData[];
+#endif
+		static void NewProp_bAiming_SetBit(void* Obj);
+		static const UECodeGen_Private::FBoolPropertyParams NewProp_bAiming;
 		static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
 		static const FCppClassTypeInfoStatic StaticCppClassTypeInfo;
 		static const UECodeGen_Private::FClassParams ClassParams;
@@ -152,11 +165,42 @@ void EmptyLinkFunctionForGeneratedCodeShooterAnimInstance() {}
 		((UShooterAnimInstance*)Obj)->bIsAccelerating = 1;
 	}
 	const UECodeGen_Private::FBoolPropertyParams Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_bIsAccelerating = { "bIsAccelerating", nullptr, (EPropertyFlags)0x0040000000020015, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, sizeof(bool), sizeof(UShooterAnimInstance), &Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_bIsAccelerating_SetBit, METADATA_PARAMS(Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_bIsAccelerating_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_bIsAccelerating_MetaData)) };
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_MovementYawOffset_MetaData[] = {
+		{ "AllowPrivateAccess", "true" },
+		{ "Category", "Movement" },
+		{ "ModuleRelativePath", "ShooterAnimInstance.h" },
+	};
+#endif
+	const UECodeGen_Private::FFloatPropertyParams Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_MovementYawOffset = { "MovementYawOffset", nullptr, (EPropertyFlags)0x0040000000000015, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(UShooterAnimInstance, MovementYawOffset), METADATA_PARAMS(Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_MovementYawOffset_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_MovementYawOffset_MetaData)) };
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_LastMovementYawOffset_MetaData[] = {
+		{ "AllowPrivateAccess", "true" },
+		{ "Category", "Movement" },
+		{ "ModuleRelativePath", "ShooterAnimInstance.h" },
+	};
+#endif
+	const UECodeGen_Private::FFloatPropertyParams Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_LastMovementYawOffset = { "LastMovementYawOffset", nullptr, (EPropertyFlags)0x0040000000000015, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(UShooterAnimInstance, LastMovementYawOffset), METADATA_PARAMS(Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_LastMovementYawOffset_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_LastMovementYawOffset_MetaData)) };
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_bAiming_MetaData[] = {
+		{ "AllowPrivateAccess", "true" },
+		{ "Category", "Movement" },
+		{ "ModuleRelativePath", "ShooterAnimInstance.h" },
+	};
+#endif
+	void Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_bAiming_SetBit(void* Obj)
+	{
+		((UShooterAnimInstance*)Obj)->bAiming = 1;
+	}
+	const UECodeGen_Private::FBoolPropertyParams Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_bAiming = { "bAiming", nullptr, (EPropertyFlags)0x0040000000020015, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, sizeof(bool), sizeof(UShooterAnimInstance), &Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_bAiming_SetBit, METADATA_PARAMS(Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_bAiming_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_bAiming_MetaData)) };
 	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UClass_UShooterAnimInstance_Statics::PropPointers[] = {
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_ShooterCharacter,
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_Speed,
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_bIsInAir,
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_bIsAccelerating,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_MovementYawOffset,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_LastMovementYawOffset,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_UShooterAnimInstance_Statics::NewProp_bAiming,
 	};
 	const FCppClassTypeInfoStatic Z_Construct_UClass_UShooterAnimInstance_Statics::StaticCppClassTypeInfo = {
 		TCppClassTypeTraits<UShooterAnimInstance>::IsAbstract,
@@ -194,9 +238,9 @@ void EmptyLinkFunctionForGeneratedCodeShooterAnimInstance() {}
 		static const FClassRegisterCompiledInInfo ClassInfo[];
 	};
 	const FClassRegisterCompiledInInfo Z_CompiledInDeferFile_FID_Shooter_Source_Shooter_ShooterAnimInstance_h_Statics::ClassInfo[] = {
-		{ Z_Construct_UClass_UShooterAnimInstance, UShooterAnimInstance::StaticClass, TEXT("UShooterAnimInstance"), &Z_Registration_Info_UClass_UShooterAnimInstance, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(UShooterAnimInstance), 2433107704U) },
+		{ Z_Construct_UClass_UShooterAnimInstance, UShooterAnimInstance::StaticClass, TEXT("UShooterAnimInstance"), &Z_Registration_Info_UClass_UShooterAnimInstance, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(UShooterAnimInstance), 1306456046U) },
 	};
-	static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_Shooter_Source_Shooter_ShooterAnimInstance_h_4001630601(TEXT("/Script/Shooter"),
+	static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_Shooter_Source_Shooter_ShooterAnimInstance_h_845739322(TEXT("/Script/Shooter"),
 		Z_CompiledInDeferFile_FID_Shooter_Source_Shooter_ShooterAnimInstance_h_Statics::ClassInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_Shooter_Source_Shooter_ShooterAnimInstance_h_Statics::ClassInfo),
 		nullptr, 0,
 		nullptr, 0);
