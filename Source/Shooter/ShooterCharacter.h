@@ -10,6 +10,9 @@ class UCameraComponent;
 class USoundCue;
 class UParticleSystem;
 class UAnimMontage;
+class AItem;
+class AWeapon;
+
 UCLASS()
 class SHOOTER_API AShooterCharacter : public ACharacter
 {
@@ -44,7 +47,13 @@ protected:
 	UFUNCTION()
 	void AutoFireReset(); //타이머 콜백
 	bool TraceUnderCrosshair(FHitResult& OutHitResult, FVector& OutHitLocation);
-	
+	void TraceForItems(); //겹칠때만 라인트레이스하는 함수
+	AWeapon* SpawnDefaultWeapon();
+	void EquipWeapon(AWeapon* WeaponToEquip);
+	void DropWeapon();
+	void SelectButtonPressed();
+	void SelectButtonReleased();
+	void SwapWeapon(AWeapon* WeaponToSwap);
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* SpringArm;
@@ -112,11 +121,29 @@ private:
 	float AutomaticFireRate;
 	FTimerHandle AutoFireTimerHandle;
 
+	bool bShouldTraceForItems; //true면 매프레임 라인트레이스
+	int8 OverlappedItemCount;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))
+	AItem* TraceHitItemLastFrame;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	AWeapon* EquippedWeapon;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AWeapon> DefaultWeaponClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	AItem* TraceHitItem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))
+	float CameraInterpDist; //카메라에서 ForwardVector로 특정거리만큼 간 거리
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))
+	float CameraInterpHeight; //카메라에서 Z방향으로 특정거리만큼 올라간 높이
 public:	
 	FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArm; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return Camera; }
 	FORCEINLINE bool IsAiming() const { return bAiming; }
 	UFUNCTION(BlueprintCallable)
 	float GetCrosshairSpreadMultiplier() const;
-
+	FORCEINLINE int8 GetOverlappedItemCount() const { return OverlappedItemCount; }
+	void IncrementOverlappedItemCount(int8 Amount);
+	FVector GetCameraInterpLocation();
+	void GetPickupItem(AItem* Item);
 };
