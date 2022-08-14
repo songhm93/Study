@@ -65,6 +65,8 @@ AShooterCharacter::AShooterCharacter()
 	bShouldTraceForItems = false;
 	CameraInterpDist = 250.f;
 	CameraInterpHeight = 65.f;
+	Starting9mmAmmo = 85;
+	StartingARAmmo = 120;
 }
 
 
@@ -78,6 +80,7 @@ void AShooterCharacter::BeginPlay()
 		CameraCurrentFOV = CameraDefaultFOV;
 	}
 	EquipWeapon(SpawnDefaultWeapon());
+	InitAmmoMap();
 	
 }
 
@@ -208,6 +211,10 @@ void AShooterCharacter::FireWeapon()
 	}
 
 	CrosshairFireTimerStart();
+	if(EquippedWeapon)
+	{
+		EquippedWeapon->DecrementAmmo();
+	}
 }
 
 bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation)
@@ -331,8 +338,11 @@ void AShooterCharacter::CrosshairFireTimerFinished()
 
 void AShooterCharacter::FireButtonPressed()
 {
-	bFireButtonPressed = true;
-	FireTimerStart();
+	if(WeaponHasAmmo())
+	{
+		bFireButtonPressed = true;
+		FireTimerStart();
+	}
 }
 
 void AShooterCharacter::FireButtonReleased()
@@ -352,10 +362,13 @@ void AShooterCharacter::FireTimerStart()
 
 void AShooterCharacter::AutoFireReset() //콜백
 {
-	bCanFire = true;
-	if(bFireButtonPressed)
+	if(WeaponHasAmmo())
 	{
-		FireTimerStart();
+		bCanFire = true;
+		if(bFireButtonPressed)
+		{
+			FireTimerStart();
+		}
 	}
 }
 
@@ -478,8 +491,7 @@ void AShooterCharacter::SelectButtonPressed()
 {
 	if(TraceHitItem)
 	{
-		auto TraceHitWeapon = Cast<AWeapon>(TraceHitItem);
-		SwapWeapon(TraceHitWeapon);
+		TraceHitItem->StartItemCurve(this);
 	}
 	
 }
@@ -511,4 +523,16 @@ void AShooterCharacter::GetPickupItem(AItem* Item)
 	{
 		SwapWeapon(Weapon);
 	}
+}
+
+void AShooterCharacter::InitAmmoMap()
+{
+	AmmoMap.Add(EAmmoType::EAT_9mm, Starting9mmAmmo);
+	AmmoMap.Add(EAmmoType::EAT_AR, StartingARAmmo);
+}
+
+bool AShooterCharacter::WeaponHasAmmo()
+{
+	if(nullptr == EquippedWeapon) return false;
+	return EquippedWeapon->GetAmmo() > 0;
 }
