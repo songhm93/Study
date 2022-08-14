@@ -3,6 +3,7 @@
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
 #include "ShooterCharacter.h"
+#include "Camera/CameraComponent.h"
 
 AItem::AItem()
 {
@@ -28,6 +29,9 @@ AItem::AItem()
 	ItemInterpStartLocation = FVector(0.f);
 	CameraTargetLoation = FVector(0.f);
 	bInterping = false;
+	ItemInterpX = 0.f;
+	ItemInterpY = 0.f;
+	InterpInitYawOffset = 0.f;
 }
 
 void AItem::BeginPlay()
@@ -50,6 +54,7 @@ void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if(bInterping) ItemInterp(DeltaTime);
 }
 
 void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -158,7 +163,20 @@ void AItem::SetItemProperties(EItemState State)
 
 			CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 			CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			break;
+		case EItemState::EIS_EquipInterping:
+			PickupWidget->SetVisibility(false);
+			ItemMesh->SetSimulatePhysics(false);
+			ItemMesh->SetEnableGravity(false);
+			ItemMesh->SetVisibility(true);
+			ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+			ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+			AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+			AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+			CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			break;
 	}
 }
@@ -177,12 +195,53 @@ void AItem::StartItemCurve(AShooterCharacter* Char)
 	SetItemState(EItemState::EIS_EquipInterping);
 
 	GetWorldTimerManager().SetTimer(ItemInterpTimerHandle, this, &ThisClass::FinishInterping, ZCurveTime);
+	
+	const float CameraRotationYaw = Character->GetCamera()->GetComponentRotation().Yaw;
+	const float ItemRotationYaw = GetActorRotation().Yaw;
+	InterpInitYawOffset = ItemRotationYaw - CameraRotationYaw;
 }
 
 void AItem::FinishInterping()
 {
+	bInterping = false;
 	if(Character)
 	{
 		Character->GetPickupItem(this);
+	}
+	SetActorScale3D(FVector(1.f));
+}
+
+void AItem::ItemInterp(float DeltaTime)
+{
+	if(!bInterping) return;
+	if(Character && ItemZCurve)
+	{
+		const float ElapsedTime = GetWorldTimerManager().GetTimerElapsed(ItemInterpTimerHandle); //타이머 경과시간 반환. 타이머는 0.7초로, 커브 시간과 동일함.
+		const float ZCurveValue = ItemZCurve->GetFloatValue(ElapsedTime);
+
+		FVector ItemLocation = ItemInterpStartLocation;
+		const FVector CameraInterpLocation = Character->GetCameraInterpLocation(); //카메라에서 앞으로, Z방향으로 올라간 위치.
+		const FVector ItemToCamera = FVector(0.f, 0.f, (CameraInterpLocation - ItemLocation).Z); //델타.
+		const float DeltaZ = ItemToCamera.Size();
+		ItemLocation.Z += ZCurveValue * DeltaZ;
+
+		const FVector CurrentLocation = GetActorLocation();
+		const float InterpXValue = FMath::FInterpTo(CurrentLocation.X, CameraInterpLocation.X, DeltaTime, 30.f);
+		const float InterpYValue = FMath::FInterpTo(CurrentLocation.Y, CameraInterpLocation.Y, DeltaTime, 30.f);
+		ItemLocation.X = InterpXValue;
+		ItemLocation.Y = InterpYValue;
+
+		SetActorLocation(ItemLocation, true, nullptr, ETeleportType::TeleportPhysics);
+
+		const FRotator CameraRotation = Character->GetCamera()->GetComponentRotation();
+		FRotator ItemRotation = FRotator(0.f, CameraRotation.Yaw + InterpInitYawOffset, 0.f);
+		SetActorRotation(ItemRotation, ETeleportType::TeleportPhysics);
+
+		if(ItemScaleCurve)
+		{
+			const float ScaleCurveValue = ItemScaleCurve->GetFloatValue(ElapsedTime);
+			SetActorScale3D(FVector(ScaleCurveValue, ScaleCurveValue, ScaleCurveValue));
+		}
+		
 	}
 }

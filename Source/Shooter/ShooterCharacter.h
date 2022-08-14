@@ -13,6 +13,15 @@ class UAnimMontage;
 class AItem;
 class AWeapon;
 
+UENUM(BlueprintType)
+enum class EAmmoType : uint8
+{
+	EAT_9mm UMETA(DisplayName = "9mm"),
+	EAT_AR UMETA(DisplayName = "Asaault Rifle"),
+
+	EAT_MAX UMETA(DisplayName = "DefaultMAX")
+};
+
 UCLASS()
 class SHOOTER_API AShooterCharacter : public ACharacter
 {
@@ -54,6 +63,8 @@ protected:
 	void SelectButtonPressed();
 	void SelectButtonReleased();
 	void SwapWeapon(AWeapon* WeaponToSwap);
+	void InitAmmoMap();
+	bool WeaponHasAmmo();
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* SpringArm;
@@ -136,6 +147,13 @@ private:
 	float CameraInterpDist; //카메라에서 ForwardVector로 특정거리만큼 간 거리
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))
 	float CameraInterpHeight; //카메라에서 Z방향으로 특정거리만큼 올라간 높이
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))
+	TMap<EAmmoType, int32> AmmoMap;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items", meta = (AllowPrivateAccess = "true"))
+	int32 Starting9mmAmmo;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items", meta = (AllowPrivateAccess = "true"))
+	int32 StartingARAmmo;
 public:	
 	FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArm; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return Camera; }

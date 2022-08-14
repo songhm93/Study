@@ -54,6 +54,7 @@ protected:
 	void SetActiveStars();
 	void SetItemProperties(EItemState State);
 	void FinishInterping(); //보간 끝. 콜백함수
+	void ItemInterp(float DeltaTime);
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* CollisionBox;
@@ -86,6 +87,11 @@ private:
 	float ZCurveTime; //커브 지속시간, 타이머 시간.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 	AShooterCharacter* Character;
+	float ItemInterpX;
+	float ItemInterpY;
+	float InterpInitYawOffset;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* ItemScaleCurve;
 public:
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget;}	
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }

@@ -5,7 +5,7 @@ AWeapon::AWeapon()
     PrimaryActorTick.bCanEverTick = true;
     ThrowWeaponTime = 0.7f;
     bFalling = false;
-    
+    Ammo = 0;
 }
 
 void AWeapon::Tick(float DeltaTime)
@@ -42,4 +42,11 @@ void AWeapon::StopFalling()
 {
     bFalling = false;
     SetItemState(EItemState::EIS_CanPickup);
+}
+
+void AWeapon::DecrementAmmo()
+{
+    if(Ammo - 1 <= 0) Ammo = 0;
+    else --Ammo;
+    
 }

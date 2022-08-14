@@ -55,6 +55,16 @@
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.0\\Engine\\Source"
 	},
 	{
+		"file": "C:\\Users\\homin\\Documents\\Unreal Projects\\Shooter\\Source\\Shooter\\ShooterPlayerController.cpp",
+		"command": "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe\" @\"C:\\Users\\homin\\Documents\\Unreal Projects\\Shooter\\.vscode\\compileCommands_Shooter\\Shooter.211.rsp\"",
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.0\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\homin\\Documents\\Unreal Projects\\Shooter\\Source\\Shooter\\ShooterPlayerController.h",
+		"command": "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe\" @\"C:\\Users\\homin\\Documents\\Unreal Projects\\Shooter\\.vscode\\compileCommands_Shooter\\Shooter.211.rsp\"",
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.0\\Engine\\Source"
+	},
+	{
 		"file": "C:\\Users\\homin\\Documents\\Unreal Projects\\Shooter\\Source\\Shooter\\Weapon.cpp",
 		"command": "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe\" @\"C:\\Users\\homin\\Documents\\Unreal Projects\\Shooter\\.vscode\\compileCommands_Shooter\\Shooter.211.rsp\"",
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.0\\Engine\\Source"

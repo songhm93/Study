@@ -22,6 +22,9 @@ void EmptyLinkFunctionForGeneratedCodeItem() {}
 	ENGINE_API UClass* Z_Construct_UClass_USkeletalMeshComponent_NoRegister();
 	UMG_API UClass* Z_Construct_UClass_UWidgetComponent_NoRegister();
 	ENGINE_API UClass* Z_Construct_UClass_USphereComponent_NoRegister();
+	ENGINE_API UClass* Z_Construct_UClass_UCurveFloat_NoRegister();
+	COREUOBJECT_API UScriptStruct* Z_Construct_UScriptStruct_FVector();
+	SHOOTER_API UClass* Z_Construct_UClass_AShooterCharacter_NoRegister();
 // End Cross Module References
 	static FEnumRegistrationInfo Z_Registration_Info_UEnum_EItemRarity;
 	static UEnum* EItemRarity_StaticEnum()
@@ -382,6 +385,35 @@ void EmptyLinkFunctionForGeneratedCodeItem() {}
 		static const UECodeGen_Private::FMetaDataPairParam NewProp_ItemState_MetaData[];
 #endif
 		static const UECodeGen_Private::FEnumPropertyParams NewProp_ItemState;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_ItemZCurve_MetaData[];
+#endif
+		static const UECodeGen_Private::FObjectPropertyParams NewProp_ItemZCurve;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_ItemInterpStartLocation_MetaData[];
+#endif
+		static const UECodeGen_Private::FStructPropertyParams NewProp_ItemInterpStartLocation;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_CameraTargetLoation_MetaData[];
+#endif
+		static const UECodeGen_Private::FStructPropertyParams NewProp_CameraTargetLoation;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_bInterping_MetaData[];
+#endif
+		static void NewProp_bInterping_SetBit(void* Obj);
+		static const UECodeGen_Private::FBoolPropertyParams NewProp_bInterping;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_ZCurveTime_MetaData[];
+#endif
+		static const UECodeGen_Private::FFloatPropertyParams NewProp_ZCurveTime;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_Character_MetaData[];
+#endif
+		static const UECodeGen_Private::FObjectPropertyParams NewProp_Character;
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_ItemScaleCurve_MetaData[];
+#endif
+		static const UECodeGen_Private::FObjectPropertyParams NewProp_ItemScaleCurve;
 		static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
 		static const FCppClassTypeInfoStatic StaticCppClassTypeInfo;
 		static const UECodeGen_Private::FClassParams ClassParams;
@@ -483,6 +515,68 @@ void EmptyLinkFunctionForGeneratedCodeItem() {}
 	};
 #endif
 	const UECodeGen_Private::FEnumPropertyParams Z_Construct_UClass_AItem_Statics::NewProp_ItemState = { "ItemState", nullptr, (EPropertyFlags)0x0040000000020015, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(AItem, ItemState), Z_Construct_UEnum_Shooter_EItemState, METADATA_PARAMS(Z_Construct_UClass_AItem_Statics::NewProp_ItemState_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_AItem_Statics::NewProp_ItemState_MetaData)) }; // 733563742
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_AItem_Statics::NewProp_ItemZCurve_MetaData[] = {
+		{ "AllowPrivateAccess", "true" },
+		{ "Category", "Item Properties" },
+		{ "ModuleRelativePath", "Item.h" },
+	};
+#endif
+	const UECodeGen_Private::FObjectPropertyParams Z_Construct_UClass_AItem_Statics::NewProp_ItemZCurve = { "ItemZCurve", nullptr, (EPropertyFlags)0x0040000000010015, UECodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(AItem, ItemZCurve), Z_Construct_UClass_UCurveFloat_NoRegister, METADATA_PARAMS(Z_Construct_UClass_AItem_Statics::NewProp_ItemZCurve_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_AItem_Statics::NewProp_ItemZCurve_MetaData)) };
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_AItem_Statics::NewProp_ItemInterpStartLocation_MetaData[] = {
+		{ "AllowPrivateAccess", "true" },
+		{ "Category", "Item Properties" },
+		{ "ModuleRelativePath", "Item.h" },
+	};
+#endif
+	const UECodeGen_Private::FStructPropertyParams Z_Construct_UClass_AItem_Statics::NewProp_ItemInterpStartLocation = { "ItemInterpStartLocation", nullptr, (EPropertyFlags)0x0040000000020015, UECodeGen_Private::EPropertyGenFlags::Struct, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(AItem, ItemInterpStartLocation), Z_Construct_UScriptStruct_FVector, METADATA_PARAMS(Z_Construct_UClass_AItem_Statics::NewProp_ItemInterpStartLocation_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_AItem_Statics::NewProp_ItemInterpStartLocation_MetaData)) };
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_AItem_Statics::NewProp_CameraTargetLoation_MetaData[] = {
+		{ "AllowPrivateAccess", "true" },
+		{ "Category", "Item Properties" },
+		{ "ModuleRelativePath", "Item.h" },
+	};
+#endif
+	const UECodeGen_Private::FStructPropertyParams Z_Construct_UClass_AItem_Statics::NewProp_CameraTargetLoation = { "CameraTargetLoation", nullptr, (EPropertyFlags)0x0040000000020015, UECodeGen_Private::EPropertyGenFlags::Struct, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(AItem, CameraTargetLoation), Z_Construct_UScriptStruct_FVector, METADATA_PARAMS(Z_Construct_UClass_AItem_Statics::NewProp_CameraTargetLoation_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_AItem_Statics::NewProp_CameraTargetLoation_MetaData)) };
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_AItem_Statics::NewProp_bInterping_MetaData[] = {
+		{ "AllowPrivateAccess", "true" },
+		{ "Category", "Item Properties" },
+		{ "ModuleRelativePath", "Item.h" },
+	};
+#endif
+	void Z_Construct_UClass_AItem_Statics::NewProp_bInterping_SetBit(void* Obj)
+	{
+		((AItem*)Obj)->bInterping = 1;
+	}
+	const UECodeGen_Private::FBoolPropertyParams Z_Construct_UClass_AItem_Statics::NewProp_bInterping = { "bInterping", nullptr, (EPropertyFlags)0x0040000000020015, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, sizeof(bool), sizeof(AItem), &Z_Construct_UClass_AItem_Statics::NewProp_bInterping_SetBit, METADATA_PARAMS(Z_Construct_UClass_AItem_Statics::NewProp_bInterping_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_AItem_Statics::NewProp_bInterping_MetaData)) };
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_AItem_Statics::NewProp_ZCurveTime_MetaData[] = {
+		{ "AllowPrivateAccess", "true" },
+		{ "Category", "Item Properties" },
+		{ "ModuleRelativePath", "Item.h" },
+	};
+#endif
+	const UECodeGen_Private::FFloatPropertyParams Z_Construct_UClass_AItem_Statics::NewProp_ZCurveTime = { "ZCurveTime", nullptr, (EPropertyFlags)0x0040000000010015, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(AItem, ZCurveTime), METADATA_PARAMS(Z_Construct_UClass_AItem_Statics::NewProp_ZCurveTime_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_AItem_Statics::NewProp_ZCurveTime_MetaData)) };
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_AItem_Statics::NewProp_Character_MetaData[] = {
+		{ "AllowPrivateAccess", "true" },
+		{ "Category", "Item Properties" },
+		{ "Comment", "//\xec\xbb\xa4\xeb\xb8\x8c \xec\xa7\x80\xec\x86\x8d\xec\x8b\x9c\xea\xb0\x84, \xed\x83\x80\xec\x9d\xb4\xeb\xa8\xb8 \xec\x8b\x9c\xea\xb0\x84.\n" },
+		{ "ModuleRelativePath", "Item.h" },
+		{ "ToolTip", "\xec\xbb\xa4\xeb\xb8\x8c \xec\xa7\x80\xec\x86\x8d\xec\x8b\x9c\xea\xb0\x84, \xed\x83\x80\xec\x9d\xb4\xeb\xa8\xb8 \xec\x8b\x9c\xea\xb0\x84." },
+	};
+#endif
+	const UECodeGen_Private::FObjectPropertyParams Z_Construct_UClass_AItem_Statics::NewProp_Character = { "Character", nullptr, (EPropertyFlags)0x0040000000020015, UECodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(AItem, Character), Z_Construct_UClass_AShooterCharacter_NoRegister, METADATA_PARAMS(Z_Construct_UClass_AItem_Statics::NewProp_Character_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_AItem_Statics::NewProp_Character_MetaData)) };
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_AItem_Statics::NewProp_ItemScaleCurve_MetaData[] = {
+		{ "AllowPrivateAccess", "true" },
+		{ "Category", "Item Properties" },
+		{ "ModuleRelativePath", "Item.h" },
+	};
+#endif
+	const UECodeGen_Private::FObjectPropertyParams Z_Construct_UClass_AItem_Statics::NewProp_ItemScaleCurve = { "ItemScaleCurve", nullptr, (EPropertyFlags)0x0040000000010015, UECodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(AItem, ItemScaleCurve), Z_Construct_UClass_UCurveFloat_NoRegister, METADATA_PARAMS(Z_Construct_UClass_AItem_Statics::NewProp_ItemScaleCurve_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_AItem_Statics::NewProp_ItemScaleCurve_MetaData)) };
 	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UClass_AItem_Statics::PropPointers[] = {
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AItem_Statics::NewProp_CollisionBox,
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AItem_Statics::NewProp_ItemMesh,
@@ -496,6 +590,13 @@ void EmptyLinkFunctionForGeneratedCodeItem() {}
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AItem_Statics::NewProp_ActiveStars,
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AItem_Statics::NewProp_ItemState_Underlying,
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AItem_Statics::NewProp_ItemState,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AItem_Statics::NewProp_ItemZCurve,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AItem_Statics::NewProp_ItemInterpStartLocation,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AItem_Statics::NewProp_CameraTargetLoation,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AItem_Statics::NewProp_bInterping,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AItem_Statics::NewProp_ZCurveTime,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AItem_Statics::NewProp_Character,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AItem_Statics::NewProp_ItemScaleCurve,
 	};
 	const FCppClassTypeInfoStatic Z_Construct_UClass_AItem_Statics::StaticCppClassTypeInfo = {
 		TCppClassTypeTraits<AItem>::IsAbstract,
@@ -538,9 +639,9 @@ void EmptyLinkFunctionForGeneratedCodeItem() {}
 		{ EItemState_StaticEnum, TEXT("EItemState"), &Z_Registration_Info_UEnum_EItemState, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 733563742U) },
 	};
 	const FClassRegisterCompiledInInfo Z_CompiledInDeferFile_FID_Shooter_Source_Shooter_Item_h_Statics::ClassInfo[] = {
-		{ Z_Construct_UClass_AItem, AItem::StaticClass, TEXT("AItem"), &Z_Registration_Info_UClass_AItem, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(AItem), 460844268U) },
+		{ Z_Construct_UClass_AItem, AItem::StaticClass, TEXT("AItem"), &Z_Registration_Info_UClass_AItem, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(AItem), 3409586633U) },
 	};
-	static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_Shooter_Source_Shooter_Item_h_3605931999(TEXT("/Script/Shooter"),
+	static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_Shooter_Source_Shooter_Item_h_396190029(TEXT("/Script/Shooter"),
 		Z_CompiledInDeferFile_FID_Shooter_Source_Shooter_Item_h_Statics::ClassInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_Shooter_Source_Shooter_Item_h_Statics::ClassInfo),
 		nullptr, 0,
 		Z_CompiledInDeferFile_FID_Shooter_Source_Shooter_Item_h_Statics::EnumInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_Shooter_Source_Shooter_Item_h_Statics::EnumInfo));

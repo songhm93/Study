@@ -16,20 +16,20 @@ struct FHitResult;
 #endif
 #define SHOOTER_Item_generated_h
 
-#define FID_Shooter_Source_Shooter_Item_h_40_SPARSE_DATA
-#define FID_Shooter_Source_Shooter_Item_h_40_RPC_WRAPPERS \
+#define FID_Shooter_Source_Shooter_Item_h_42_SPARSE_DATA
+#define FID_Shooter_Source_Shooter_Item_h_42_RPC_WRAPPERS \
  \
 	DECLARE_FUNCTION(execOnSphereEndOverlap); \
 	DECLARE_FUNCTION(execOnSphereOverlap);
 
 
-#define FID_Shooter_Source_Shooter_Item_h_40_RPC_WRAPPERS_NO_PURE_DECLS \
+#define FID_Shooter_Source_Shooter_Item_h_42_RPC_WRAPPERS_NO_PURE_DECLS \
  \
 	DECLARE_FUNCTION(execOnSphereEndOverlap); \
 	DECLARE_FUNCTION(execOnSphereOverlap);
 
 
-#define FID_Shooter_Source_Shooter_Item_h_40_INCLASS_NO_PURE_DECLS \
+#define FID_Shooter_Source_Shooter_Item_h_42_INCLASS_NO_PURE_DECLS \
 private: \
 	static void StaticRegisterNativesAItem(); \
 	friend struct Z_Construct_UClass_AItem_Statics; \
@@ -38,7 +38,7 @@ public: \
 	DECLARE_SERIALIZER(AItem)
 
 
-#define FID_Shooter_Source_Shooter_Item_h_40_INCLASS \
+#define FID_Shooter_Source_Shooter_Item_h_42_INCLASS \
 private: \
 	static void StaticRegisterNativesAItem(); \
 	friend struct Z_Construct_UClass_AItem_Statics; \
@@ -47,7 +47,7 @@ public: \
 	DECLARE_SERIALIZER(AItem)
 
 
-#define FID_Shooter_Source_Shooter_Item_h_40_STANDARD_CONSTRUCTORS \
+#define FID_Shooter_Source_Shooter_Item_h_42_STANDARD_CONSTRUCTORS \
 	/** Standard constructor, called after all reflected properties have been initialized */ \
 	NO_API AItem(const FObjectInitializer& ObjectInitializer); \
 	DEFINE_DEFAULT_OBJECT_INITIALIZER_CONSTRUCTOR_CALL(AItem) \
@@ -60,7 +60,7 @@ private: \
 public:
 
 
-#define FID_Shooter_Source_Shooter_Item_h_40_ENHANCED_CONSTRUCTORS \
+#define FID_Shooter_Source_Shooter_Item_h_42_ENHANCED_CONSTRUCTORS \
 private: \
 	/** Private move- and copy-constructors, should never be used */ \
 	NO_API AItem(AItem&&); \
@@ -71,25 +71,25 @@ public: \
 	DEFINE_DEFAULT_CONSTRUCTOR_CALL(AItem)
 
 
-#define FID_Shooter_Source_Shooter_Item_h_37_PROLOG
-#define FID_Shooter_Source_Shooter_Item_h_40_GENERATED_BODY_LEGACY \
+#define FID_Shooter_Source_Shooter_Item_h_39_PROLOG
+#define FID_Shooter_Source_Shooter_Item_h_42_GENERATED_BODY_LEGACY \
 PRAGMA_DISABLE_DEPRECATION_WARNINGS \
 public: \
-	FID_Shooter_Source_Shooter_Item_h_40_SPARSE_DATA \
-	FID_Shooter_Source_Shooter_Item_h_40_RPC_WRAPPERS \
-	FID_Shooter_Source_Shooter_Item_h_40_INCLASS \
-	FID_Shooter_Source_Shooter_Item_h_40_STANDARD_CONSTRUCTORS \
+	FID_Shooter_Source_Shooter_Item_h_42_SPARSE_DATA \
+	FID_Shooter_Source_Shooter_Item_h_42_RPC_WRAPPERS \
+	FID_Shooter_Source_Shooter_Item_h_42_INCLASS \
+	FID_Shooter_Source_Shooter_Item_h_42_STANDARD_CONSTRUCTORS \
 public: \
 PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 
-#define FID_Shooter_Source_Shooter_Item_h_40_GENERATED_BODY \
+#define FID_Shooter_Source_Shooter_Item_h_42_GENERATED_BODY \
 PRAGMA_DISABLE_DEPRECATION_WARNINGS \
 public: \
-	FID_Shooter_Source_Shooter_Item_h_40_SPARSE_DATA \
-	FID_Shooter_Source_Shooter_Item_h_40_RPC_WRAPPERS_NO_PURE_DECLS \
-	FID_Shooter_Source_Shooter_Item_h_40_INCLASS_NO_PURE_DECLS \
-	FID_Shooter_Source_Shooter_Item_h_40_ENHANCED_CONSTRUCTORS \
+	FID_Shooter_Source_Shooter_Item_h_42_SPARSE_DATA \
+	FID_Shooter_Source_Shooter_Item_h_42_RPC_WRAPPERS_NO_PURE_DECLS \
+	FID_Shooter_Source_Shooter_Item_h_42_INCLASS_NO_PURE_DECLS \
+	FID_Shooter_Source_Shooter_Item_h_42_ENHANCED_CONSTRUCTORS \
 private: \
 PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
