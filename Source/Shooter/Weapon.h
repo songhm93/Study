@@ -5,8 +5,6 @@
 #include "AmmoType.h"
 #include "Weapon.generated.h"
 
-<<<<<<< HEAD
-=======
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
@@ -16,7 +14,6 @@ enum class EWeaponType : uint8
 	EWT_MAX UMETA(DisplayName = "DefaultMAX")
 };
 
->>>>>>> 0920
 
 UCLASS()
 class SHOOTER_API AWeapon : public AItem
