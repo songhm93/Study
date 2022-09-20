@@ -65,8 +65,9 @@ AShooterCharacter::AShooterCharacter()
 	bShouldTraceForItems = false;
 	CameraInterpDist = 250.f;
 	CameraInterpHeight = 65.f;
-	Starting9mmAmmo = 85;
+	Starting9mmAmmo = 90;
 	StartingARAmmo = 120;
+	CombatState = ECombatState::ECS_Unoccupied;
 }
 
 
@@ -122,6 +123,8 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction(TEXT("Select"), IE_Pressed, this, &AShooterCharacter::SelectButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Select"), IE_Released, this, &AShooterCharacter::SelectButtonReleased);
+
+	PlayerInputComponent->BindAction(TEXT("Reload"), IE_Pressed, this, &AShooterCharacter::ReloadButtonPressed);
 }
 
 void AShooterCharacter::MoveForward(float Value)
@@ -170,51 +173,23 @@ void AShooterCharacter::LookUp(float Value)
 
 void AShooterCharacter::FireWeapon()
 {
-	if (FireSound)
-	{
-		UGameplayStatics::PlaySound2D(this, FireSound);
-	}
-	const USkeletalMeshSocket* BarrelSocket = GetMesh()->GetSocketByName("BarrelSocket");
-	if (BarrelSocket)
-	{
-		const FTransform SocketTransform = BarrelSocket->GetSocketTransform(GetMesh());
+	if(nullptr == EquippedWeapon) return;
+	if(CombatState != ECombatState::ECS_Unoccupied) return;
 
-		if (MuzzleFlash)
-		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);
-		}
-
-		FVector BeamEnd;
-		bool bBeamEnd = GetBeamEndLocation(SocketTransform.GetLocation(), BeamEnd);
-		if(bBeamEnd)
-		{
-			if(ImpactParticle)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, BeamEnd);
-			}
-
-			if(BeamParticle)
-			{
-				UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticle, SocketTransform);
-				if(Beam)
-				{
-					Beam->SetVectorParameter(FName("Target"), BeamEnd);
-				}
-			}
-		}
-	}
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if(AnimInstance && HipFireMontage)
+	if(WeaponHasAmmo())
 	{
-		AnimInstance->Montage_Play(HipFireMontage);
-		AnimInstance->Montage_JumpToSection(FName("StartFire"));
-	}
-
-	CrosshairFireTimerStart();
-	if(EquippedWeapon)
-	{
+		PlayFireSound();
+		SendBullet();
+		PlayGunfireMontage();
+		CrosshairFireTimerStart();
 		EquippedWeapon->DecrementAmmo();
+
+		FireTimerStart();
 	}
+	
+	
+	
+	
 }
 
 bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation)
@@ -338,11 +313,8 @@ void AShooterCharacter::CrosshairFireTimerFinished()
 
 void AShooterCharacter::FireButtonPressed()
 {
-	if(WeaponHasAmmo())
-	{
-		bFireButtonPressed = true;
-		FireTimerStart();
-	}
+	bFireButtonPressed = true;
+	FireWeapon();
 }
 
 void AShooterCharacter::FireButtonReleased()
@@ -352,23 +324,25 @@ void AShooterCharacter::FireButtonReleased()
 
 void AShooterCharacter::FireTimerStart()
 {
-	if(bCanFire)
-	{
-		FireWeapon();
-		bCanFire = false;
-		GetWorldTimerManager().SetTimer(AutoFireTimerHandle, this, &ThisClass::AutoFireReset, AutomaticFireRate);
-	}
+	CombatState = ECombatState::ECS_FireTimerInProgress;
+	
+	
+	GetWorldTimerManager().SetTimer(AutoFireTimerHandle, this, &ThisClass::AutoFireReset, AutomaticFireRate);
+	
 }
 
 void AShooterCharacter::AutoFireReset() //콜백
 {
+	CombatState = ECombatState::ECS_Unoccupied;
+
 	if(WeaponHasAmmo())
 	{
-		bCanFire = true;
 		if(bFireButtonPressed)
-		{
-			FireTimerStart();
-		}
+			FireWeapon();
+	}
+	else
+	{
+		ReloadWeapon();
 	}
 }
 
@@ -535,4 +509,121 @@ bool AShooterCharacter::WeaponHasAmmo()
 {
 	if(nullptr == EquippedWeapon) return false;
 	return EquippedWeapon->GetAmmo() > 0;
+}
+
+void AShooterCharacter::PlayFireSound()
+{
+	if (FireSound)
+		{
+			UGameplayStatics::PlaySound2D(this, FireSound);
+		}
+}
+
+void AShooterCharacter::SendBullet()
+{
+	const USkeletalMeshSocket* BarrelSocket = EquippedWeapon->GetItemMesh()->GetSocketByName("BarrelSocket");
+	if (BarrelSocket)
+	{
+		const FTransform SocketTransform = BarrelSocket->GetSocketTransform(EquippedWeapon->GetItemMesh());
+
+		if (MuzzleFlash)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);
+		}
+
+		FVector BeamEnd;
+		bool bBeamEnd = GetBeamEndLocation(SocketTransform.GetLocation(), BeamEnd);
+		if(bBeamEnd)
+		{
+			if(ImpactParticle)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, BeamEnd);
+			}
+
+			if(BeamParticle)
+			{
+				UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticle, SocketTransform);
+				if(Beam)
+				{
+					Beam->SetVectorParameter(FName("Target"), BeamEnd);
+				}
+			}
+		}
+	}
+}
+
+void AShooterCharacter::PlayGunfireMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if(AnimInstance && HipFireMontage)
+	{
+		AnimInstance->Montage_Play(HipFireMontage);
+		AnimInstance->Montage_JumpToSection(FName("StartFire"));
+	}
+}
+
+void AShooterCharacter::ReloadButtonPressed()
+{
+	ReloadWeapon();
+}
+
+void AShooterCharacter::ReloadWeapon()
+{
+	if(CombatState != ECombatState::ECS_Unoccupied) return;
+
+	if(EquippedWeapon && CarryingAmmo())
+	{
+		CombatState = ECombatState::ECS_Reloading;
+		FName MontageSection = EquippedWeapon->GetReloadMontageSection();
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if(AnimInstance && ReloadMontage)
+		{
+			AnimInstance->Montage_Play(ReloadMontage);
+			AnimInstance->Montage_JumpToSection(MontageSection);
+		}
+	}
+	
+}
+
+bool AShooterCharacter::CarryingAmmo()
+{
+	if(nullptr == EquippedWeapon) return false;
+	
+	EAmmoType AmmoType = EquippedWeapon->GetAmmoType();
+
+	if(AmmoMap.Contains(AmmoType))
+	{
+		return AmmoMap[AmmoType] > 0;
+	}
+
+	return false;
+}
+
+void AShooterCharacter::FinishReloading()
+{
+	CombatState = ECombatState::ECS_Unoccupied;
+
+	if(nullptr == EquippedWeapon) return;
+
+	const EAmmoType AmmoType = EquippedWeapon->GetAmmoType();
+
+	if(AmmoMap.Contains(AmmoType))
+	{
+		int32 CarriedAmmo = AmmoMap[AmmoType];
+
+		const int32 MagEmptySpace = EquippedWeapon->GetMagazineCapacity() - EquippedWeapon->GetAmmo();
+		//탄창에 넣을 수 있는 탄의 양이, 가진 휴대탄 양보다 많으면 휴대탄을 다 넣을 수 있다.
+		if(MagEmptySpace > CarriedAmmo)
+		{
+			EquippedWeapon->ReloadAmmo(CarriedAmmo);
+			CarriedAmmo = 0;
+			AmmoMap.Add(AmmoType, CarriedAmmo); //맵에 0으로 초기화
+		}
+		else //현재 가지고 있는 휴대탄이, 탄창에 넣을 수 있는 양보다 많으면 탄창에 비는 양만큼 넣고, 휴대탄은 그만큼 Minus.
+		{
+			EquippedWeapon->ReloadAmmo(MagEmptySpace);
+			CarriedAmmo -= MagEmptySpace;
+			AmmoMap.Add(AmmoType, CarriedAmmo);
+		}
+	}
 }
