@@ -4,9 +4,7 @@
 #include "Item.h"
 #include "Weapon.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class SHOOTER_API AWeapon : public AItem
 {
