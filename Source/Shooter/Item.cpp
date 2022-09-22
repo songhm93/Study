@@ -32,6 +32,8 @@ AItem::AItem()
 	ItemInterpX = 0.f;
 	ItemInterpY = 0.f;
 	InterpInitYawOffset = 0.f;
+	MaterialIndex = 0;
+	bCanChangeCustomDepth = true;
 }
 
 void AItem::BeginPlay()
@@ -48,6 +50,8 @@ void AItem::BeginPlay()
 	AreaSphere->OnComponentEndOverlap.AddDynamic(this, &ThisClass::OnSphereEndOverlap);
 
 	SetItemProperties(ItemState);
+
+	InitCustomDepth();
 }
 
 void AItem::Tick(float DeltaTime)
@@ -199,6 +203,8 @@ void AItem::StartItemCurve(AShooterCharacter* Char)
 	const float CameraRotationYaw = Character->GetCamera()->GetComponentRotation().Yaw;
 	const float ItemRotationYaw = GetActorRotation().Yaw;
 	InterpInitYawOffset = ItemRotationYaw - CameraRotationYaw;
+
+	bCanChangeCustomDepth = false;
 }
 
 void AItem::FinishInterping()
@@ -209,6 +215,9 @@ void AItem::FinishInterping()
 		Character->GetPickupItem(this);
 	}
 	SetActorScale3D(FVector(1.f));
+	DisableGlowMaterial();
+	bCanChangeCustomDepth = true;
+	DisableCustomDepth();
 }
 
 void AItem::ItemInterp(float DeltaTime)
@@ -243,5 +252,52 @@ void AItem::ItemInterp(float DeltaTime)
 			SetActorScale3D(FVector(ScaleCurveValue, ScaleCurveValue, ScaleCurveValue));
 		}
 		
+	}
+}
+
+void AItem::EnableCustomDepth()
+{
+	if(bCanChangeCustomDepth)
+	{
+		ItemMesh->SetRenderCustomDepth(true);
+	}
+}
+
+void AItem::DisableCustomDepth()
+{
+	if(bCanChangeCustomDepth)
+	{
+		ItemMesh->SetRenderCustomDepth(false);
+	}
+}
+
+void AItem::InitCustomDepth()
+{
+	DisableCustomDepth();
+}
+
+void AItem::OnConstruction(const FTransform& Transform)
+{
+	if(MI)
+	{
+		DynamicMI = UMaterialInstanceDynamic::Create(MI, this);
+		ItemMesh->SetMaterial(MaterialIndex, DynamicMI);
+	}
+	EnableGlowMaterial();
+}
+
+void AItem::EnableGlowMaterial()
+{
+	if(DynamicMI)
+	{
+		DynamicMI->SetScalarParameterValue(TEXT("GlowBlendAlpha"), 0);
+	}
+}
+
+void AItem::DisableGlowMaterial()
+{
+	if(DynamicMI)
+	{
+		DynamicMI->SetScalarParameterValue(TEXT("GlowBlendAlpha"), 1);
 	}
 }

@@ -34,7 +34,7 @@ public:
 	AShooterCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	
 protected:
 	virtual void BeginPlay() override;
 	void MoveForward(float Value);
@@ -74,6 +74,12 @@ protected:
 	void ReloadButtonPressed();
 	void ReloadWeapon();
 	bool CarryingAmmo();
+	UFUNCTION(BlueprintCallable)
+	void GrapClip();
+	UFUNCTION(BlueprintCallable)
+	void ReleaseClip();
+	void CrouchButton();
+	void InterpCapsuleHalfHeight(float DeltaTime);
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* SpringArm;
@@ -172,6 +178,25 @@ private:
 
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	FTransform ClipTransform;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	USceneComponent* HandSceneComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	bool bCrouching;
+
+	float CurrentCapsuleHalfHeight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float StandingCapsuleHalfHeight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float CrouchingCapsuleHalfHeight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float BaseGroundFriction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float CrouchingGroundFriction;
 public:	
 	FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArm; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return Camera; }
@@ -182,4 +207,6 @@ public:
 	void IncrementOverlappedItemCount(int8 Amount);
 	FVector GetCameraInterpLocation();
 	void GetPickupItem(AItem* Item);
+	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
+	FORCEINLINE bool IsCrouching() const { return bCrouching; }
 };

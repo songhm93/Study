@@ -10,6 +10,7 @@ AWeapon::AWeapon()
     AmmoType = EAmmoType::EAT_9mm;
     ReloadMontageSection = FName(TEXT("Reload SMG"));
     MagazineCapacity = 30;
+    ClipBoneName = FName(TEXT("smg_clip"));
 }
 
 void AWeapon::Tick(float DeltaTime)
@@ -40,6 +41,8 @@ void AWeapon::ThrowWeaponTimerStart()
     bFalling = true;
     GetWorldTimerManager().SetTimer(ThrowWeaponTimerHandle, this, &ThisClass::StopFalling, ThrowWeaponTime);
 
+    EnableGlowMaterial();
+
 }
 
 void AWeapon::StopFalling()
@@ -59,4 +62,9 @@ void AWeapon::ReloadAmmo(int32 Amount)
 {
     checkf(Ammo + Amount <= MagazineCapacity, TEXT("용량 초과"));
     Ammo += Amount;
+}
+
+bool AWeapon::ClipIsFull()
+{
+    return Ammo >= MagazineCapacity;
 }

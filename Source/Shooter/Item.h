@@ -35,6 +35,7 @@ class UWidgetComponent;
 class USphereComponent;
 class UCurveFloat;
 class AShooterCharacter;
+class USoundCue;
 
 UCLASS()
 class SHOOTER_API AItem : public AActor
@@ -44,7 +45,8 @@ class SHOOTER_API AItem : public AActor
 public:
 	AItem();
 	virtual void Tick(float DeltaTime) override;
-
+	virtual void EnableCustomDepth();
+	virtual void DisableCustomDepth();
 protected:
 	virtual void BeginPlay() override;
 	UFUNCTION()
@@ -55,6 +57,11 @@ protected:
 	void SetItemProperties(EItemState State);
 	void FinishInterping(); //보간 끝. 콜백함수
 	void ItemInterp(float DeltaTime);
+	
+	virtual void InitCustomDepth();
+	virtual void OnConstruction(const FTransform& Transform) override;
+	void EnableGlowMaterial();
+	void DisableGlowMaterial();
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* CollisionBox;
@@ -92,7 +99,17 @@ private:
 	float InterpInitYawOffset;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 	UCurveFloat* ItemScaleCurve;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	USoundCue* PickupSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	USoundCue* EquipSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	int32 MaterialIndex;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	UMaterialInstanceDynamic* DynamicMI;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	UMaterialInstance* MI;
+	bool bCanChangeCustomDepth;
 public:
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget;}	
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
@@ -101,4 +118,6 @@ public:
 	void SetItemState(EItemState State);
 	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const { return ItemMesh; }
 	void StartItemCurve(AShooterCharacter* Char);
+	FORCEINLINE USoundCue* GetPickupSound() const { return PickupSound; }
+	FORCEINLINE USoundCue* GetEquipSound() const { return EquipSound; }
 };
