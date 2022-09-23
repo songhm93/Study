@@ -21,6 +21,7 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		bCrouching = ShooterCharacter->IsCrouching();
 		
 		bReloading = ShooterCharacter->GetCombatState() == ECombatState::ECS_Reloading;
+		bEquipping = ShooterCharacter->GetCombatState() == ECombatState::ECS_Equipping;
 		FVector Velocity = ShooterCharacter->GetVelocity();
 		Velocity.Z = 0;
 		Speed = Velocity.Size();
@@ -114,7 +115,7 @@ void UShooterAnimInstance::TurnInPlace()
 
 	if(bTIP)
 		{
-			if(bReloading)
+			if(bReloading || bEquipping)
 			{
 				RecoilWeight = 1.f;
 			}
@@ -127,7 +128,7 @@ void UShooterAnimInstance::TurnInPlace()
 		{
 			if(bCrouching)
 			{
-				if(bReloading)
+				if(bReloading || bEquipping)
 				{
 					RecoilWeight = 1.f;
 				}
@@ -138,7 +139,7 @@ void UShooterAnimInstance::TurnInPlace()
 			}
 			else
 			{
-				if(bAiming || bReloading)
+				if(bAiming || bReloading || bEquipping)
 				{
 					RecoilWeight = 1.f;
 				}

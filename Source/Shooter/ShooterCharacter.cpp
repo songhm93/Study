@@ -76,6 +76,7 @@ AShooterCharacter::AShooterCharacter()
 	HandSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("HandSceneComp"));
 	BaseGroundFriction = 2.f;
 	CrouchingGroundFriction = 100.f;
+	
 }
 
 
@@ -89,6 +90,11 @@ void AShooterCharacter::BeginPlay()
 		CameraCurrentFOV = CameraDefaultFOV;
 	}
 	EquipWeapon(SpawnDefaultWeapon());
+	Inventory.Add(EquippedWeapon);
+	EquippedWeapon->SetSlotIndex(0);
+	EquippedWeapon->DisableCustomDepth();
+	EquippedWeapon->DisableGlowMaterial();
+
 	InitAmmoMap();
 	
 }
@@ -135,6 +141,13 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction(TEXT("Reload"), IE_Pressed, this, &AShooterCharacter::ReloadButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Crouch"), IE_Pressed, this, &ThisClass::CrouchButton);
+
+	PlayerInputComponent->BindAction(TEXT("FKey"), IE_Pressed, this, &ThisClass::FKeyPressed);
+	PlayerInputComponent->BindAction(TEXT("1Key"), IE_Pressed, this, &ThisClass::OneKeyPressed);
+	PlayerInputComponent->BindAction(TEXT("2Key"), IE_Pressed, this, &ThisClass::TwoKeyPressed);
+	PlayerInputComponent->BindAction(TEXT("3Key"), IE_Pressed, this, &ThisClass::ThreeKeyPressed);
+	PlayerInputComponent->BindAction(TEXT("4Key"), IE_Pressed, this, &ThisClass::FourKeyPressed);
+	PlayerInputComponent->BindAction(TEXT("5Key"), IE_Pressed, this, &ThisClass::FiveKeyPressed);
 }
 
 void AShooterCharacter::MoveForward(float Value)
@@ -417,10 +430,24 @@ void AShooterCharacter::TraceForItems()
 	if(TraceUnderCrosshair(ItemTraceResult, TempLocation))
 	{
 		TraceHitItem = Cast<AItem>(ItemTraceResult.GetActor());
+		if(TraceHitItem && TraceHitItem->GetItemState() == EItemState::EIS_EquipInterping)
+		{
+			TraceHitItem = nullptr;
+		}
+
 		if(TraceHitItem && TraceHitItem->GetPickupWidget())
 		{
 			TraceHitItem->GetPickupWidget()->SetVisibility(true);
 			TraceHitItem->EnableCustomDepth();
+
+			if(Inventory.Num() >= INVENTORY_CAPACITY) //인벤 꽉참
+			{
+				TraceHitItem->SetInventoryFull(true);
+			}
+			else
+			{
+				TraceHitItem->SetInventoryFull(false);
+			}
 		}
 
 		if(TraceHitItemLastFrame)
@@ -460,6 +487,16 @@ void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 		{
 			HandSocket->AttachActor(WeaponToEquip, GetMesh());
 		}
+
+		if(nullptr == EquippedWeapon)
+		{
+			EquipItemDelegate.Broadcast(-1, WeaponToEquip->GetSlotIndex());
+		}
+		else
+		{
+			EquipItemDelegate.Broadcast(EquippedWeapon->GetSlotIndex(), WeaponToEquip->GetSlotIndex());
+		}
+
 		EquippedWeapon = WeaponToEquip;
 		EquippedWeapon->SetItemState(EItemState::EIS_Equipped);
 	}
@@ -479,16 +516,16 @@ void AShooterCharacter::DropWeapon()
 
 void AShooterCharacter::SelectButtonPressed()
 {
-	if(TraceHitItem)
+	if(CombatState == ECombatState::ECS_Reloading) return;
+	if(TraceHitItem && OverlapCount > 0)
 	{
 		TraceHitItem->StartItemCurve(this);
-
 		if(TraceHitItem->GetPickupSound())
 		{
 			UGameplayStatics::PlaySound2D(this, TraceHitItem->GetPickupSound());
 		}
+		TraceHitItem = nullptr;
 	}
-	
 }
 
 void AShooterCharacter::SelectButtonReleased()
@@ -498,6 +535,12 @@ void AShooterCharacter::SelectButtonReleased()
 
 void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
 {
+	if(Inventory.Num() - 1 >= EquippedWeapon->GetSlotIndex())
+	{
+		Inventory[EquippedWeapon->GetSlotIndex()] = WeaponToSwap;
+		WeaponToSwap->SetSlotIndex(EquippedWeapon->GetSlotIndex());
+	}
+
 	DropWeapon();
 	EquipWeapon(WeaponToSwap);
 	TraceHitItem = nullptr;
@@ -520,7 +563,16 @@ void AShooterCharacter::GetPickupItem(AItem* Item)
 		{
 			UGameplayStatics::PlaySound2D(this, Weapon->GetEquipSound());
 		}
-		SwapWeapon(Weapon);
+		if(Inventory.Num() < INVENTORY_CAPACITY)
+		{
+			Weapon->SetSlotIndex(Inventory.Num());
+			Inventory.Add(Weapon);
+			Weapon->SetItemState(EItemState::EIS_Pickedup);
+		}
+		else //인벤 꽉참.
+		{
+			SwapWeapon(Weapon);
+		}
 	}
 }
 
@@ -539,9 +591,9 @@ bool AShooterCharacter::WeaponHasAmmo()
 void AShooterCharacter::PlayFireSound()
 {
 	if (FireSound)
-		{
-			UGameplayStatics::PlaySound2D(this, FireSound);
-		}
+	{
+		UGameplayStatics::PlaySound2D(this, FireSound);
+	}
 }
 
 void AShooterCharacter::SendBullet()
@@ -712,4 +764,69 @@ void AShooterCharacter::InterpCapsuleHalfHeight(float DeltaTime)
 
 	GetCapsuleComponent()->SetCapsuleHalfHeight(InterpHalfHeight);
 
+}
+
+void AShooterCharacter::FKeyPressed()
+{
+	if(EquippedWeapon->GetSlotIndex() == 0) return;
+	ExchangeInventoryItems(EquippedWeapon->GetSlotIndex(), 0);
+}
+
+void AShooterCharacter::OneKeyPressed()
+{
+	if(EquippedWeapon->GetSlotIndex() == 1) return;
+	ExchangeInventoryItems(EquippedWeapon->GetSlotIndex(), 1);
+}
+
+void AShooterCharacter::TwoKeyPressed()
+{
+	if(EquippedWeapon->GetSlotIndex() == 2) return;
+	ExchangeInventoryItems(EquippedWeapon->GetSlotIndex(), 2);
+}
+
+void AShooterCharacter::ThreeKeyPressed()
+{
+	if(EquippedWeapon->GetSlotIndex() == 3) return;
+	ExchangeInventoryItems(EquippedWeapon->GetSlotIndex(), 3);
+}
+
+void AShooterCharacter::FourKeyPressed()
+{
+	if(EquippedWeapon->GetSlotIndex() == 4) return;
+	ExchangeInventoryItems(EquippedWeapon->GetSlotIndex(), 4);
+}
+
+void AShooterCharacter::FiveKeyPressed()
+{
+	if(EquippedWeapon->GetSlotIndex() == 5) return;
+	ExchangeInventoryItems(EquippedWeapon->GetSlotIndex(), 5);
+}
+
+void AShooterCharacter::ExchangeInventoryItems(int32 CurrentItemIdx, int32 NewItemIdx)
+{
+	if(CombatState == ECombatState::ECS_Reloading) return;
+	if((CurrentItemIdx == NewItemIdx) || (NewItemIdx >= Inventory.Num())) return;
+	AWeapon* OldEquippedWeapon = EquippedWeapon;
+	AWeapon* NewWeapon = Cast<AWeapon>(Inventory[NewItemIdx]);
+	EquipWeapon(NewWeapon);
+
+	OldEquippedWeapon->SetItemState(EItemState::EIS_Pickedup);
+	NewWeapon->SetItemState(EItemState::EIS_Equipped);
+
+	CombatState = ECombatState::ECS_Equipping;
+	UAnimInstance* AnimInst = GetMesh()->GetAnimInstance();
+	if(AnimInst && EquipMontage)
+	{
+		AnimInst->Montage_Play(EquipMontage, 1.f);
+		AnimInst->Montage_JumpToSection(FName("Equip"));
+		if(SwapSound)
+		{
+			UGameplayStatics::PlaySound2D(this, SwapSound);
+		}
+	}
+}
+
+void AShooterCharacter::FinishEquipping()
+{
+	CombatState = ECombatState::ECS_Unoccupied;
 }

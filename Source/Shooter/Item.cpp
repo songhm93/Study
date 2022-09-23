@@ -4,7 +4,7 @@
 #include "Components/SphereComponent.h"
 #include "ShooterCharacter.h"
 #include "Camera/CameraComponent.h"
-
+#include "Curves/CurveVector.h"
 AItem::AItem()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -34,6 +34,12 @@ AItem::AItem()
 	InterpInitYawOffset = 0.f;
 	MaterialIndex = 0;
 	bCanChangeCustomDepth = true;
+	PulseCurveTime = 5.f;
+	GlowAmount = 150.f;
+	FresnelExponent = 3.f;
+	FresnelFraction = 4.f;
+	SlotIndex = 0;
+	bInventoryFull = false;
 }
 
 void AItem::BeginPlay()
@@ -52,6 +58,8 @@ void AItem::BeginPlay()
 	SetItemProperties(ItemState);
 
 	InitCustomDepth();
+
+	StartPulseTimer();
 }
 
 void AItem::Tick(float DeltaTime)
@@ -59,6 +67,8 @@ void AItem::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if(bInterping) ItemInterp(DeltaTime);
+
+	UpdatePulse();
 }
 
 void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -69,6 +79,7 @@ void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 		if(ShooterCharacter)
 		{
 			ShooterCharacter->IncrementOverlappedItemCount(1);
+			ShooterCharacter->OverlapCountPlus();
 		}
 	}
 }
@@ -81,6 +92,9 @@ void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 		if(ShooterCharacter)
 		{
 			ShooterCharacter->IncrementOverlappedItemCount(-1);
+			GetPickupWidget()->SetVisibility(false);
+			DisableCustomDepth();
+			ShooterCharacter->OverlapCountMinus();
 		}
 	}
 }
@@ -158,6 +172,7 @@ void AItem::SetItemProperties(EItemState State)
 		case EItemState::EIS_Falling:
 			ItemMesh->SetSimulatePhysics(true);
 			ItemMesh->SetEnableGravity(true);
+			ItemMesh->SetVisibility(true);
 			ItemMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 			ItemMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
@@ -182,6 +197,20 @@ void AItem::SetItemProperties(EItemState State)
 			CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 			CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			break;
+		case EItemState::EIS_Pickedup:
+			PickupWidget->SetVisibility(false);
+			ItemMesh->SetSimulatePhysics(false);
+			ItemMesh->SetEnableGravity(false);
+			ItemMesh->SetVisibility(false);
+			ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+			ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+			AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+			CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			break;
 	}
 }
 
@@ -197,7 +226,7 @@ void AItem::StartItemCurve(AShooterCharacter* Char)
 	ItemInterpStartLocation = GetActorLocation(); //아이템 시작 위치 초기화
 	bInterping = true;
 	SetItemState(EItemState::EIS_EquipInterping);
-
+	GetWorldTimerManager().ClearTimer(PulseTimerHandle);
 	GetWorldTimerManager().SetTimer(ItemInterpTimerHandle, this, &ThisClass::FinishInterping, ZCurveTime);
 	
 	const float CameraRotationYaw = Character->GetCamera()->GetComponentRotation().Yaw;
@@ -300,4 +329,48 @@ void AItem::DisableGlowMaterial()
 	{
 		DynamicMI->SetScalarParameterValue(TEXT("GlowBlendAlpha"), 1);
 	}
+}
+
+void AItem::ResetPulseTimer()
+{
+	StartPulseTimer();
+}
+
+void AItem::StartPulseTimer()
+{
+	if(ItemState == EItemState::EIS_CanPickup)
+	{
+		GetWorldTimerManager().SetTimer(PulseTimerHandle, this, &AItem::ResetPulseTimer, PulseCurveTime);
+	}
+}
+
+void AItem::UpdatePulse()
+{
+	float ElapsedTime = 0.f;
+	FVector CurveValue = FVector::ZeroVector;
+	switch (ItemState)
+	{
+	case EItemState::EIS_CanPickup:
+		if(PulseCurve)
+		{
+			ElapsedTime = GetWorldTimerManager().GetTimerElapsed(PulseTimerHandle);
+			CurveValue = PulseCurve->GetVectorValue(ElapsedTime);
+		}
+		break;
+	case EItemState::EIS_EquipInterping:
+		if(InterpPulseCurve)
+		{
+			ElapsedTime = GetWorldTimerManager().GetTimerElapsed(ItemInterpTimerHandle);
+			CurveValue = InterpPulseCurve->GetVectorValue(ElapsedTime);
+		}
+		break;
+	}
+
+	if(DynamicMI)
+	{
+		DynamicMI->SetScalarParameterValue(TEXT("GlowAmount"), CurveValue.X * GlowAmount);
+		DynamicMI->SetScalarParameterValue(TEXT("FresnelExponent"), CurveValue.Y * FresnelExponent);
+		DynamicMI->SetScalarParameterValue(TEXT("FresnelFraction"), CurveValue.Z * FresnelFraction);
+	}
+	
 }

@@ -72,4 +72,6 @@ private:
 	float RecoilWeight = 1.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	bool bTIP = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Crouching", meta = (AllowPrivateAccess = "true"))
+	bool bEquipping = false;
 };

@@ -6,13 +6,6 @@
 #include "ShooterCharacter.generated.h"
 
 
-class USpringArmComponent;
-class UCameraComponent;
-class USoundCue;
-class UParticleSystem;
-class UAnimMontage;
-class AItem;
-class AWeapon;
 
 
 UENUM(BlueprintType)
@@ -21,9 +14,20 @@ enum class ECombatState : uint8
 	ECS_Unoccupied UMETA(DisplayName = "Unoccupied"),
 	ECS_FireTimerInProgress UMETA(DisplayName = "FireTimerInProgress"),
 	ECS_Reloading UMETA(DisplayName = "Reloading"),
+	ECS_Equipping UMETA(DisplayName = "Equipping"),
 
 	ECS_MAX UMETA(DisplayName = "DefaultMAX")
 };
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEquipItemDelegate, int32, CurrentSlotIndex, int32, NewSlotIndex);
+
+class USpringArmComponent;
+class UCameraComponent;
+class USoundCue;
+class UParticleSystem;
+class UAnimMontage;
+class AItem;
+class AWeapon;
 
 UCLASS()
 class SHOOTER_API AShooterCharacter : public ACharacter
@@ -80,6 +84,13 @@ protected:
 	void ReleaseClip();
 	void CrouchButton();
 	void InterpCapsuleHalfHeight(float DeltaTime);
+	void FKeyPressed();
+	void OneKeyPressed();
+	void TwoKeyPressed();
+	void ThreeKeyPressed();
+	void FourKeyPressed();
+	void FiveKeyPressed();
+	void ExchangeInventoryItems(int32 CurrentItemIdx, int32 NewItemIdx);
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* SpringArm;
@@ -109,6 +120,8 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category ="Combat", meta = (AllowPrivateAccess = "true"))
 	USoundCue* FireSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category ="Combat", meta = (AllowPrivateAccess = "true"))
+	USoundCue* SwapSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* MuzzleFlash;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
@@ -197,6 +210,20 @@ private:
 	float BaseGroundFriction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float CrouchingGroundFriction;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
+	TArray<AItem*> Inventory;
+
+	const int32 INVENTORY_CAPACITY = 6;
+
+	UPROPERTY(BlueprintAssignable, Category = "Delegate", meta = (AllowPrivateAccess = "true"))
+	FEquipItemDelegate EquipItemDelegate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* EquipMontage;
+	UFUNCTION(BlueprintCallable)
+	void FinishEquipping();
+	int32 OverlapCount = 0;
 public:	
 	FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArm; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return Camera; }
@@ -209,4 +236,8 @@ public:
 	void GetPickupItem(AItem* Item);
 	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
 	FORCEINLINE bool IsCrouching() const { return bCrouching; }
+	FORCEINLINE void SetTraceHitItem(AItem* Item) { TraceHitItem = Item; }
+	
+	FORCEINLINE void OverlapCountPlus() { OverlapCount++; }
+	FORCEINLINE void OverlapCountMinus() { OverlapCount--; }
 };
