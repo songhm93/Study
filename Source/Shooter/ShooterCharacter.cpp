@@ -76,7 +76,7 @@ AShooterCharacter::AShooterCharacter()
 	HandSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("HandSceneComp"));
 	BaseGroundFriction = 2.f;
 	CrouchingGroundFriction = 100.f;
-	
+	HighlightedSlot = -1;
 }
 
 
@@ -430,6 +430,22 @@ void AShooterCharacter::TraceForItems()
 	if(TraceUnderCrosshair(ItemTraceResult, TempLocation))
 	{
 		TraceHitItem = Cast<AItem>(ItemTraceResult.GetActor());
+		const AWeapon* TraceHitWeapon = Cast<AWeapon>(TraceHitItem);
+		if(TraceHitWeapon)
+		{
+			if(HighlightedSlot == -1)
+			{
+				HighlightInventorySlot();
+			}
+		}
+		else
+		{
+			if(HighlightedSlot != -1)
+			{
+				UnHighlightInventorySlot();
+			}
+		}
+
 		if(TraceHitItem && TraceHitItem->GetItemState() == EItemState::EIS_EquipInterping)
 		{
 			TraceHitItem = nullptr;
@@ -478,7 +494,7 @@ AWeapon* AShooterCharacter::SpawnDefaultWeapon()
 	return nullptr;
 }
 
-void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
+void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip, bool bSwapping)
 {
 	if(WeaponToEquip)
 	{
@@ -492,7 +508,7 @@ void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 		{
 			EquipItemDelegate.Broadcast(-1, WeaponToEquip->GetSlotIndex());
 		}
-		else
+		else if(!bSwapping)
 		{
 			EquipItemDelegate.Broadcast(EquippedWeapon->GetSlotIndex(), WeaponToEquip->GetSlotIndex());
 		}
@@ -542,7 +558,7 @@ void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
 	}
 
 	DropWeapon();
-	EquipWeapon(WeaponToSwap);
+	EquipWeapon(WeaponToSwap, true);
 	TraceHitItem = nullptr;
 	TraceHitItemLastFrame = nullptr;
 }
@@ -804,24 +820,28 @@ void AShooterCharacter::FiveKeyPressed()
 
 void AShooterCharacter::ExchangeInventoryItems(int32 CurrentItemIdx, int32 NewItemIdx)
 {
-	if(CombatState == ECombatState::ECS_Reloading) return;
-	if((CurrentItemIdx == NewItemIdx) || (NewItemIdx >= Inventory.Num())) return;
-	AWeapon* OldEquippedWeapon = EquippedWeapon;
-	AWeapon* NewWeapon = Cast<AWeapon>(Inventory[NewItemIdx]);
-	EquipWeapon(NewWeapon);
-
-	OldEquippedWeapon->SetItemState(EItemState::EIS_Pickedup);
-	NewWeapon->SetItemState(EItemState::EIS_Equipped);
-
-	CombatState = ECombatState::ECS_Equipping;
-	UAnimInstance* AnimInst = GetMesh()->GetAnimInstance();
-	if(AnimInst && EquipMontage)
+	if((CurrentItemIdx != NewItemIdx) && \
+	(NewItemIdx < Inventory.Num()) && \
+	(CombatState == ECombatState::ECS_Unoccupied) || \
+	(CombatState == ECombatState::ECS_Equipping))
 	{
-		AnimInst->Montage_Play(EquipMontage, 1.f);
-		AnimInst->Montage_JumpToSection(FName("Equip"));
-		if(SwapSound)
+		AWeapon* OldEquippedWeapon = EquippedWeapon;
+		AWeapon* NewWeapon = Cast<AWeapon>(Inventory[NewItemIdx]);
+		EquipWeapon(NewWeapon);
+
+		OldEquippedWeapon->SetItemState(EItemState::EIS_Pickedup);
+		NewWeapon->SetItemState(EItemState::EIS_Equipped);
+
+		CombatState = ECombatState::ECS_Equipping;
+		UAnimInstance* AnimInst = GetMesh()->GetAnimInstance();
+		if(AnimInst && EquipMontage)
 		{
-			UGameplayStatics::PlaySound2D(this, SwapSound);
+			AnimInst->Montage_Play(EquipMontage, 1.f);
+			AnimInst->Montage_JumpToSection(FName("Equip"));
+			if(SwapSound)
+			{
+				UGameplayStatics::PlaySound2D(this, SwapSound);
+			}
 		}
 	}
 }
@@ -829,4 +849,33 @@ void AShooterCharacter::ExchangeInventoryItems(int32 CurrentItemIdx, int32 NewIt
 void AShooterCharacter::FinishEquipping()
 {
 	CombatState = ECombatState::ECS_Unoccupied;
+}
+
+int32 AShooterCharacter::GetEmptyInventorySlot()
+{
+	for(int32 i = 0; i < Inventory.Num(); ++i)//?? 여기 들어올일이 있나요?
+	{
+		if(Inventory[i] == nullptr) //5개면 0 1 2 3 4 인데 거기가 nullptr일리가 없잖아요?
+		{
+			return i; //??대체 무슨 뜻인지 이게 ..
+		}
+	}
+	if(Inventory.Num() < INVENTORY_CAPACITY) 
+	{
+		return Inventory.Num();
+	}
+	return -1; //인벤토리 꽉참
+}
+
+void AShooterCharacter::HighlightInventorySlot()
+{
+	const int32 EmptySlot = GetEmptyInventorySlot();
+	HighlightIconDelegate.Broadcast(EmptySlot, true);
+	HighlightedSlot = EmptySlot;
+}
+
+void AShooterCharacter::UnHighlightInventorySlot()
+{
+	HighlightIconDelegate.Broadcast(HighlightedSlot, false);
+	HighlightedSlot = -1;
 }

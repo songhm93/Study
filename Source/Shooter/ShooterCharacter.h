@@ -6,7 +6,8 @@
 #include "ShooterCharacter.generated.h"
 
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEquipItemDelegate, int32, CurrentSlotIndex, int32, NewSlotIndex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHighlightIconDelegate, int32, SlotIndex, bool, bStartAnim);
 
 UENUM(BlueprintType)
 enum class ECombatState : uint8
@@ -18,8 +19,6 @@ enum class ECombatState : uint8
 
 	ECS_MAX UMETA(DisplayName = "DefaultMAX")
 };
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEquipItemDelegate, int32, CurrentSlotIndex, int32, NewSlotIndex);
 
 class USpringArmComponent;
 class UCameraComponent;
@@ -38,7 +37,7 @@ public:
 	AShooterCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+	void UnHighlightInventorySlot();
 protected:
 	virtual void BeginPlay() override;
 	void MoveForward(float Value);
@@ -65,7 +64,7 @@ protected:
 	bool TraceUnderCrosshair(FHitResult& OutHitResult, FVector& OutHitLocation);
 	void TraceForItems(); //겹칠때만 라인트레이스하는 함수
 	AWeapon* SpawnDefaultWeapon();
-	void EquipWeapon(AWeapon* WeaponToEquip);
+	void EquipWeapon(AWeapon* WeaponToEquip, bool bSwapping = false);
 	void DropWeapon();
 	void SelectButtonPressed();
 	void SelectButtonReleased();
@@ -91,6 +90,9 @@ protected:
 	void FourKeyPressed();
 	void FiveKeyPressed();
 	void ExchangeInventoryItems(int32 CurrentItemIdx, int32 NewItemIdx);
+	int32 GetEmptyInventorySlot();
+	void HighlightInventorySlot();
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* SpringArm;
@@ -213,17 +215,22 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
 	TArray<AItem*> Inventory;
-
 	const int32 INVENTORY_CAPACITY = 6;
 
 	UPROPERTY(BlueprintAssignable, Category = "Delegate", meta = (AllowPrivateAccess = "true"))
 	FEquipItemDelegate EquipItemDelegate;
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* EquipMontage;
 	UFUNCTION(BlueprintCallable)
 	void FinishEquipping();
 	int32 OverlapCount = 0;
+
+	UPROPERTY(BlueprintAssignable, Category = "Delegate", meta = (AllowPrivateAccess = "true"))
+	FHighlightIconDelegate HighlightIconDelegate;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
+	int32 HighlightedSlot;
 public:	
 	FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArm; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return Camera; }

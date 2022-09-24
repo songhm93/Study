@@ -95,6 +95,7 @@ void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 			GetPickupWidget()->SetVisibility(false);
 			DisableCustomDepth();
 			ShooterCharacter->OverlapCountMinus();
+			ShooterCharacter->UnHighlightInventorySlot();
 		}
 	}
 }
@@ -242,6 +243,8 @@ void AItem::FinishInterping()
 	if(Character)
 	{
 		Character->GetPickupItem(this);
+
+		Character->UnHighlightInventorySlot();
 	}
 	SetActorScale3D(FVector(1.f));
 	DisableGlowMaterial();
