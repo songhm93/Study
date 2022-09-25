@@ -5,6 +5,8 @@
 #include "ShooterCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Curves/CurveVector.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 AItem::AItem()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -40,6 +42,8 @@ AItem::AItem()
 	FresnelFraction = 4.f;
 	SlotIndex = 0;
 	bInventoryFull = false;
+	ItemType = EItemType::MAX;
+	InterpLocIdx = 0;
 }
 
 void AItem::BeginPlay()
@@ -60,6 +64,8 @@ void AItem::BeginPlay()
 	InitCustomDepth();
 
 	StartPulseTimer();
+
+	Character = Cast<AShooterCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 }
 
 void AItem::Tick(float DeltaTime)
@@ -91,11 +97,12 @@ void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 		AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(OtherActor);
 		if(ShooterCharacter)
 		{
-			ShooterCharacter->IncrementOverlappedItemCount(-1);
-			GetPickupWidget()->SetVisibility(false);
-			DisableCustomDepth();
 			ShooterCharacter->OverlapCountMinus();
+			ShooterCharacter->IncrementOverlappedItemCount(-1);
+			DisableCustomDepth();
 			ShooterCharacter->UnHighlightInventorySlot();
+			if(ShooterCharacter->GetOverlapCount() == 0)
+				GetPickupWidget()->SetVisibility(false);
 		}
 	}
 }
@@ -224,6 +231,13 @@ void AItem::SetItemState(EItemState State)
 void AItem::StartItemCurve(AShooterCharacter* Char)
 {
 	Character = Char;
+	InterpLocIdx = Character->GetInterpLocationIdx();
+	Character->IncrementInterpLocItemCount(InterpLocIdx, 1);
+	if(PickupSound)
+	{
+		UGameplayStatics::PlaySound2D(this, PickupSound);
+	}
+
 	ItemInterpStartLocation = GetActorLocation(); //아이템 시작 위치 초기화
 	bInterping = true;
 	SetItemState(EItemState::EIS_EquipInterping);
@@ -242,6 +256,7 @@ void AItem::FinishInterping()
 	bInterping = false;
 	if(Character)
 	{
+		Character->IncrementInterpLocItemCount(InterpLocIdx, -1);
 		Character->GetPickupItem(this);
 
 		Character->UnHighlightInventorySlot();
@@ -261,7 +276,7 @@ void AItem::ItemInterp(float DeltaTime)
 		const float ZCurveValue = ItemZCurve->GetFloatValue(ElapsedTime);
 
 		FVector ItemLocation = ItemInterpStartLocation;
-		const FVector CameraInterpLocation = Character->GetCameraInterpLocation(); //카메라에서 앞으로, Z방향으로 올라간 위치.
+		const FVector CameraInterpLocation = GetInterpLocation(); //카메라에서 앞으로, Z방향으로 올라간 위치.
 		const FVector ItemToCamera = FVector(0.f, 0.f, (CameraInterpLocation - ItemLocation).Z); //델타.
 		const float DeltaZ = ItemToCamera.Size();
 		ItemLocation.Z += ZCurveValue * DeltaZ;
@@ -308,14 +323,56 @@ void AItem::InitCustomDepth()
 	DisableCustomDepth();
 }
 
-void AItem::OnConstruction(const FTransform& Transform)
+void AItem::OnConstruction(const FTransform& Transform) // 클래스의 인스턴스가 (에디터에서) 배치되거나 생성될 때 호출된다.
 {
+
+	
+	//데이터 테이블 로드
+	FString RarityTablePath = FString(TEXT("/Game/_Game/DataTable/ItemRarityDataTable.ItemRarityDataTable"));
+	UDataTable* RarityTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RarityTablePath));
+	if(RarityTableObject)
+	{
+		FItemRarityTable* RarityRow = nullptr;
+		switch(ItemRarity)
+		{	
+			case EItemRarity::EIR_Damaged:
+				RarityRow = RarityTableObject->FindRow<FItemRarityTable>(FName("Damaged"), TEXT(""));
+				break;
+			case EItemRarity::EIR_Common:
+				RarityRow = RarityTableObject->FindRow<FItemRarityTable>(FName("Common"), TEXT(""));
+				break;
+			case EItemRarity::EIR_Uncommon:
+				RarityRow = RarityTableObject->FindRow<FItemRarityTable>(FName("Uncommon"), TEXT(""));
+				break;
+			case EItemRarity::EIR_Rare:
+				RarityRow = RarityTableObject->FindRow<FItemRarityTable>(FName("Rare"), TEXT(""));
+				break;
+			case EItemRarity::EIR_Legendary:
+				RarityRow = RarityTableObject->FindRow<FItemRarityTable>(FName("Legendary"), TEXT(""));
+				break;
+
+		}
+
+		if(RarityRow)
+		{
+			GlowColor = RarityRow->GlowColor;
+			LightColor = RarityRow->LightColor;
+			DarkColor = RarityRow->DarkColor;
+			NumberOfStars = RarityRow->NumberOfStars;
+			IconBackground = RarityRow->IconBackground;
+			if(GetItemMesh())
+				GetItemMesh()->SetCustomDepthStencilValue(RarityRow->CustomDS);
+		}
+	}
+
 	if(MI)
 	{
 		DynamicMI = UMaterialInstanceDynamic::Create(MI, this);
+		DynamicMI->SetVectorParameterValue(TEXT("FresnelColor"), GlowColor);
 		ItemMesh->SetMaterial(MaterialIndex, DynamicMI);
+
+		EnableGlowMaterial();
 	}
-	EnableGlowMaterial();
 }
 
 void AItem::EnableGlowMaterial()
@@ -349,6 +406,16 @@ void AItem::StartPulseTimer()
 
 void AItem::UpdatePulse()
 {
+	if(nullptr == Character) Character = Cast<AShooterCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	if(Character)
+	{
+		if(Character->GetOverlapCount() == 0)
+		{
+			GetPickupWidget()->SetVisibility(false);
+			DisableCustomDepth();
+		}
+	}
+	
 	float ElapsedTime = 0.f;
 	FVector CurveValue = FVector::ZeroVector;
 	switch (ItemState)
@@ -376,4 +443,22 @@ void AItem::UpdatePulse()
 		DynamicMI->SetScalarParameterValue(TEXT("FresnelFraction"), CurveValue.Z * FresnelFraction);
 	}
 	
+}
+
+FVector AItem::GetInterpLocation()
+{
+	if(nullptr == Character) return FVector::ZeroVector;
+
+	switch (ItemType)
+	{
+	case EItemType::Ammo:	
+		return Character->GetInterpLocation(InterpLocIdx).SceneComponent->GetComponentLocation();;
+		break;
+	
+	case EItemType::Weapon:
+		return Character->GetInterpLocation(0).SceneComponent->GetComponentLocation();;
+		break;
+	}
+
+	return FVector();
 }

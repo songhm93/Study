@@ -20,6 +20,24 @@ enum class ECombatState : uint8
 	ECS_MAX UMETA(DisplayName = "DefaultMAX")
 };
 
+USTRUCT(BlueprintType)
+struct FInterpLocation
+{
+	GENERATED_BODY()
+	FInterpLocation(){}
+	FInterpLocation(USceneComponent* Comp, int32 Count)
+	{
+		SceneComponent = Comp;
+		ItemCount = Count;
+	}
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USceneComponent* SceneComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int32 ItemCount;
+
+};
+
 class USpringArmComponent;
 class UCameraComponent;
 class USoundCue;
@@ -27,6 +45,8 @@ class UParticleSystem;
 class UAnimMontage;
 class AItem;
 class AWeapon;
+class AAmmo;
+class USceneComponent;
 
 UCLASS()
 class SHOOTER_API AShooterCharacter : public ACharacter
@@ -37,7 +57,7 @@ public:
 	AShooterCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	void UnHighlightInventorySlot();
+	
 protected:
 	virtual void BeginPlay() override;
 	void MoveForward(float Value);
@@ -92,7 +112,9 @@ protected:
 	void ExchangeInventoryItems(int32 CurrentItemIdx, int32 NewItemIdx);
 	int32 GetEmptyInventorySlot();
 	void HighlightInventorySlot();
-
+	void PickupAmmo(AAmmo* Ammo);
+	void InitInterpLocation();
+	
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* SpringArm;
@@ -231,20 +253,44 @@ private:
 	FHighlightIconDelegate HighlightIconDelegate;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
 	int32 HighlightedSlot;
-public:	
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* WeaponInterpComp;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp1;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp2;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp3;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp4;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp5;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp6;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TArray<FInterpLocation> InterpLocation;
+public:	//get
 	FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArm; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return Camera; }
 	FORCEINLINE bool IsAiming() const { return bAiming; }
-	UFUNCTION(BlueprintCallable)
-	float GetCrosshairSpreadMultiplier() const;
 	FORCEINLINE int8 GetOverlappedItemCount() const { return OverlappedItemCount; }
-	void IncrementOverlappedItemCount(int8 Amount);
-	FVector GetCameraInterpLocation();
-	void GetPickupItem(AItem* Item);
 	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
 	FORCEINLINE bool IsCrouching() const { return bCrouching; }
+	FORCEINLINE int32 GetOverlapCount() const { return OverlapCount; }
+	FORCEINLINE AWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
+public: //set
 	FORCEINLINE void SetTraceHitItem(AItem* Item) { TraceHitItem = Item; }
-	
 	FORCEINLINE void OverlapCountPlus() { OverlapCount++; }
 	FORCEINLINE void OverlapCountMinus() { OverlapCount--; }
+public:
+	void IncrementOverlappedItemCount(int8 Amount);
+	//FVector GetCameraInterpLocation();
+	void GetPickupItem(AItem* Item);
+	void UnHighlightInventorySlot();
+	int32 GetInterpLocationIdx();
+	void IncrementInterpLocItemCount(int32 Idx, int32 Amount);
+	FInterpLocation GetInterpLocation(int32 Idx);
+	UFUNCTION(BlueprintCallable)
+	float GetCrosshairSpreadMultiplier() const;
 };

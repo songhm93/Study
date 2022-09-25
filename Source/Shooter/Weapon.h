@@ -3,17 +3,44 @@
 #include "CoreMinimal.h"
 #include "Item.h"
 #include "AmmoType.h"
+#include "Engine/DataTable.h"
+#include "WeaponType.h"
 #include "Weapon.generated.h"
 
-UENUM(BlueprintType)
-enum class EWeaponType : uint8
+
+
+class USoundCue;
+class UWidgetComponent;
+
+USTRUCT(BlueprintType)
+struct FWeaponDataTable : public FTableRowBase
 {
-	EWT_SubmachineGun UMETA(DisplayName = "SubmachineGun"),
-	EWT_AssaultRifle UMETA(DisplayName = "AssaultRifle"),
+	GENERATED_BODY()
 
-	EWT_MAX UMETA(DisplayName = "DefaultMAX")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EAmmoType AmmoType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 WeaponAmmo;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 MagazineCapacity;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundCue* PickupSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundCue* EquipSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMesh* ItemMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString ItemName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* InventoryIcon;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* AmmoIcon;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInstance* MI;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 MaterialIdx;
+
 };
-
 
 UCLASS()
 class SHOOTER_API AWeapon : public AItem
@@ -24,6 +51,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 protected:
 	void StopFalling();
+
+	virtual void OnConstruction(const FTransform& Transform) override;
 private:
 	FTimerHandle ThrowWeaponTimerHandle;
 	float ThrowWeaponTime;
@@ -43,17 +72,22 @@ private:
 	bool bMovingClip;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))
 	FName ClipBoneName;
-public:
-	void ThrowWeaponTimerStart();
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
+	UDataTable* WeaponDataTable;
+	int32 PrevMaterialIdx;
+public: //get
 	FORCEINLINE	 int32 GetAmmo() const { return Ammo;  }
 	FORCEINLINE	 int32 GetMagazineCapacity() const { return MagazineCapacity;  }
-	void DecrementAmmo();
 	FORCEINLINE	 EWeaponType GetWeaponType() const { return WeaponType;  }
 	FORCEINLINE	 EAmmoType GetAmmoType() const { return AmmoType;  }
 	FORCEINLINE	 FName GetReloadMontageSection() const { return ReloadMontageSection;  }
-	void ReloadAmmo(int32 Amount);
 	FORCEINLINE	 FName GetClipBoneName() const { return ClipBoneName;  }
+public: //set
 	FORCEINLINE void SetMovingClip(bool Move) { bMovingClip = Move; }
+public:
+	void ThrowWeaponTimerStart();
+	void DecrementAmmo();
+	void ReloadAmmo(int32 Amount);
 	bool ClipIsFull();
 
 };

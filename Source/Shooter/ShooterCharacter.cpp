@@ -13,6 +13,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Ammo.h"
 
 
 AShooterCharacter::AShooterCharacter()
@@ -77,6 +78,23 @@ AShooterCharacter::AShooterCharacter()
 	BaseGroundFriction = 2.f;
 	CrouchingGroundFriction = 100.f;
 	HighlightedSlot = -1;
+
+	WeaponInterpComp = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponInterpComp"));
+	WeaponInterpComp->SetupAttachment(GetCamera());
+
+	InterpComp1 = CreateDefaultSubobject<USceneComponent>(TEXT("InterpComp1"));
+	InterpComp2 = CreateDefaultSubobject<USceneComponent>(TEXT("InterpComp2"));
+	InterpComp3 = CreateDefaultSubobject<USceneComponent>(TEXT("InterpComp3"));
+	InterpComp4 = CreateDefaultSubobject<USceneComponent>(TEXT("InterpComp4"));
+	InterpComp5 = CreateDefaultSubobject<USceneComponent>(TEXT("InterpComp5"));
+	InterpComp6 = CreateDefaultSubobject<USceneComponent>(TEXT("InterpComp6"));
+
+	InterpComp1->SetupAttachment(GetCamera());
+	InterpComp2->SetupAttachment(GetCamera());
+	InterpComp3->SetupAttachment(GetCamera());
+	InterpComp4->SetupAttachment(GetCamera());
+	InterpComp5->SetupAttachment(GetCamera());
+	InterpComp6->SetupAttachment(GetCamera());
 }
 
 
@@ -96,7 +114,7 @@ void AShooterCharacter::BeginPlay()
 	EquippedWeapon->DisableGlowMaterial();
 
 	InitAmmoMap();
-	
+	InitInterpLocation();
 }
 
 void AShooterCharacter::Tick(float DeltaTime)
@@ -536,10 +554,10 @@ void AShooterCharacter::SelectButtonPressed()
 	if(TraceHitItem && OverlapCount > 0)
 	{
 		TraceHitItem->StartItemCurve(this);
-		if(TraceHitItem->GetPickupSound())
-		{
-			UGameplayStatics::PlaySound2D(this, TraceHitItem->GetPickupSound());
-		}
+		// if(TraceHitItem->GetPickupSound())
+		// {
+		// 	UGameplayStatics::PlaySound2D(this, TraceHitItem->GetPickupSound());
+		// }
 		TraceHitItem = nullptr;
 	}
 }
@@ -563,12 +581,12 @@ void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
 	TraceHitItemLastFrame = nullptr;
 }
 
-FVector AShooterCharacter::GetCameraInterpLocation()
-{
-	const FVector CameraWorldLocation = Camera->GetComponentLocation();
-	const FVector CameraForward = Camera->GetForwardVector();
-	return (CameraWorldLocation + CameraForward * CameraInterpDist) + (FVector(0.f, 0.f, CameraInterpHeight));
-}
+// FVector AShooterCharacter::GetCameraInterpLocation()
+// {
+// 	const FVector CameraWorldLocation = Camera->GetComponentLocation();
+// 	const FVector CameraForward = Camera->GetForwardVector();
+// 	return (CameraWorldLocation + CameraForward * CameraInterpDist) + (FVector(0.f, 0.f, CameraInterpHeight));
+// }
 
 void AShooterCharacter::GetPickupItem(AItem* Item)
 {
@@ -589,6 +607,12 @@ void AShooterCharacter::GetPickupItem(AItem* Item)
 		{
 			SwapWeapon(Weapon);
 		}
+	}
+
+	AAmmo* Ammo = Cast<AAmmo>(Item);
+	if(Ammo)
+	{
+		PickupAmmo(Ammo);
 	}
 }
 
@@ -878,4 +902,81 @@ void AShooterCharacter::UnHighlightInventorySlot()
 {
 	HighlightIconDelegate.Broadcast(HighlightedSlot, false);
 	HighlightedSlot = -1;
+}
+
+void AShooterCharacter::PickupAmmo(AAmmo* Ammo)
+{
+	if(Ammo)
+	{
+		if(AmmoMap.Find(Ammo->GetAmmoType()))
+		{
+			int32 AmmoAmount = AmmoMap[Ammo->GetAmmoType()];
+			AmmoAmount += Ammo->GetItemCount();
+			AmmoMap[Ammo->GetAmmoType()] = AmmoAmount;
+		}
+		if(EquippedWeapon)
+		{
+			if(EquippedWeapon->GetAmmoType() == Ammo->GetAmmoType())
+			{
+				if(EquippedWeapon->GetAmmo() == 0)
+				{
+					ReloadWeapon();
+				}
+			}
+		}
+	}
+
+	Ammo->Destroy();
+}
+
+FInterpLocation AShooterCharacter::GetInterpLocation(int32 Idx)
+{
+	if(Idx <= InterpLocation.Num())
+	{
+		return InterpLocation[Idx];
+	}
+	return FInterpLocation();
+}
+
+void AShooterCharacter::InitInterpLocation()
+{
+	FInterpLocation WeaponLocation = FInterpLocation(WeaponInterpComp, 0);
+	InterpLocation.Add(WeaponLocation);
+
+	FInterpLocation InterpLoc1 = FInterpLocation(InterpComp1, 0);
+	InterpLocation.Add(InterpLoc1);
+	FInterpLocation InterpLoc2 = FInterpLocation(InterpComp2, 0);
+	InterpLocation.Add(InterpLoc2);
+	FInterpLocation InterpLoc3 = FInterpLocation(InterpComp3, 0);
+	InterpLocation.Add(InterpLoc3);
+	FInterpLocation InterpLoc4 = FInterpLocation(InterpComp4, 0);
+	InterpLocation.Add(InterpLoc4);
+	FInterpLocation InterpLoc5 = FInterpLocation(InterpComp5, 0);
+	InterpLocation.Add(InterpLoc5);
+	FInterpLocation InterpLoc6 = FInterpLocation(InterpComp6, 0);
+	InterpLocation.Add(InterpLoc6);
+}
+
+int32 AShooterCharacter::GetInterpLocationIdx()
+{
+	int32 LowestIdx = 1;
+	int32 LowestCount = INT_MAX;
+	for(int32 i = 1; i < InterpLocation.Num(); ++i)
+	{
+		if(InterpLocation[i].ItemCount < LowestCount)
+		{
+			LowestIdx = i;
+			LowestCount = InterpLocation[i].ItemCount;
+		}
+	}
+	return LowestIdx;
+}
+
+void AShooterCharacter::IncrementInterpLocItemCount(int32 Idx, int32 Amount)
+{
+	if(Amount < -1 || Amount > 1) return;
+	if(InterpLocation.Num() >= Idx)
+	{
+		InterpLocation[Idx].ItemCount += Amount;
+	}
 }
