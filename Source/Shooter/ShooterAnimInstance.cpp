@@ -24,6 +24,9 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		
 		bReloading = ShooterCharacter->GetCombatState() == ECombatState::ECS_Reloading;
 		bEquipping = ShooterCharacter->GetCombatState() == ECombatState::ECS_Equipping;
+		bShouldUseFABRIK = 
+			ShooterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied || 
+			ShooterCharacter->GetCombatState() == ECombatState::ECS_FireTimerInProgress;
 		FVector Velocity = ShooterCharacter->GetVelocity();
 		Velocity.Z = 0;
 		Speed = Velocity.Size();
