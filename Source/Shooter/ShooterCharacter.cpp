@@ -227,10 +227,6 @@ void AShooterCharacter::FireWeapon()
 
 		FireTimerStart();
 	}
-	
-	
-	
-	
 }
 
 bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation)
@@ -370,8 +366,10 @@ void AShooterCharacter::FireTimerStart()
 {
 	CombatState = ECombatState::ECS_FireTimerInProgress;
 	
-	
-	GetWorldTimerManager().SetTimer(AutoFireTimerHandle, this, &ThisClass::AutoFireReset, AutomaticFireRate);
+	if(EquippedWeapon)
+	{
+		GetWorldTimerManager().SetTimer(AutoFireTimerHandle, this, &ThisClass::AutoFireReset, EquippedWeapon->GetAutoFireRate());
+	}
 	
 }
 
@@ -630,39 +628,45 @@ bool AShooterCharacter::WeaponHasAmmo()
 
 void AShooterCharacter::PlayFireSound()
 {
-	if (FireSound)
+	if (EquippedWeapon)
 	{
-		UGameplayStatics::PlaySound2D(this, FireSound);
+		if(EquippedWeapon->GetFireSound())
+		{
+			UGameplayStatics::PlaySound2D(this, EquippedWeapon->GetFireSound());
+		}
 	}
 }
 
 void AShooterCharacter::SendBullet()
 {
 	const USkeletalMeshSocket* BarrelSocket = EquippedWeapon->GetItemMesh()->GetSocketByName("BarrelSocket");
-	if (BarrelSocket)
+	if(EquippedWeapon)
 	{
-		const FTransform SocketTransform = BarrelSocket->GetSocketTransform(EquippedWeapon->GetItemMesh());
-
-		if (MuzzleFlash)
+		if (BarrelSocket)
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);
-		}
+			const FTransform SocketTransform = BarrelSocket->GetSocketTransform(EquippedWeapon->GetItemMesh());
 
-		FVector BeamEnd;
-		bool bBeamEnd = GetBeamEndLocation(SocketTransform.GetLocation(), BeamEnd);
-		if(bBeamEnd)
-		{
-			if(ImpactParticle)
+			if (EquippedWeapon->GetMuzzleFlash())
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, BeamEnd);
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EquippedWeapon->GetMuzzleFlash(), SocketTransform);
 			}
 
-			if(BeamParticle)
+			FVector BeamEnd;
+			bool bBeamEnd = GetBeamEndLocation(SocketTransform.GetLocation(), BeamEnd);
+			if(bBeamEnd)
 			{
-				UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticle, SocketTransform);
-				if(Beam)
+				if(ImpactParticle)
 				{
-					Beam->SetVectorParameter(FName("Target"), BeamEnd);
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, BeamEnd);
+				}
+
+				if(BeamParticle)
+				{
+					UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticle, SocketTransform);
+					if(Beam)
+					{
+						Beam->SetVectorParameter(FName("Target"), BeamEnd);
+					}
 				}
 			}
 		}
@@ -723,13 +727,10 @@ void AShooterCharacter::GrapClip()
 
 	int32 ClipBoneIndex = EquippedWeapon->GetItemMesh()->GetBoneIndex(EquippedWeapon->GetClipBoneName());
 	ClipTransform = EquippedWeapon->GetItemMesh()->GetBoneTransform(ClipBoneIndex);
-
 	FAttachmentTransformRules AttachmentRules = FAttachmentTransformRules(EAttachmentRule::KeepRelative, true);
 	
-	HandSceneComponent->AttachToComponent(GetMesh(), AttachmentRules, FName(TEXT("Hand_L")));
+	HandSceneComponent->AttachToComponent(GetMesh(), AttachmentRules, FName(TEXT("hand_l")));
 	HandSceneComponent->SetWorldTransform(ClipTransform);
-	
-	
 
 	EquippedWeapon->SetMovingClip(true);
 }

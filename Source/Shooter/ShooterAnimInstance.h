@@ -59,22 +59,32 @@ private:
 	float RotationCurveLastFrame = 0.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TurnInPlace", meta = (AllowPrivateAccess = "true"))
 	float Pitch = 0.f;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TurnInPlace", meta = (AllowPrivateAccess = "true"))
 	bool bReloading = false;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TurnInPlace", meta = (AllowPrivateAccess = "true"))
 	EOffsetState OffsetState = EOffsetState::EOS_Hip;
 	FRotator CharacterRotation = FRotator::ZeroRotator;
 	FRotator CharacterRotationLastFrame = FRotator::ZeroRotator;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Lean", meta = (AllowPrivateAccess = "true"))
 	float YawDelta = 0.f;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Crouching", meta = (AllowPrivateAccess = "true"))
 	bool bCrouching = false;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float RecoilWeight = 1.f;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	bool bTIP = false;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Crouching", meta = (AllowPrivateAccess = "true"))
 	bool bEquipping = false;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	EWeaponType EquippedWeaponType = EWeaponType::EWT_MAX;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	bool bShouldUseFABRIK = false;
 };
